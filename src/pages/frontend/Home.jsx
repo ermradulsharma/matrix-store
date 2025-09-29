@@ -4,13 +4,13 @@ import Support from "../../components/frontend/Support/Support";
 import ProductList from "../../components/frontend/ProductList/ProductList";
 
 function Home() {
-  return (
-    <>
-        <CasualSlider />
-        <Support />
-        <ProductList />
-    </>
-  );
+    return (
+        <>
+            <CasualSlider />
+            <Support />
+            <ProductList />
+        </>
+    );
 }
 
 export default Home;
