@@ -12,7 +12,7 @@ function Product() {
   const [filters, setFilters] = useState({ category: "", priceRange: "" });
 
   // const apiUrl = "https://fakestoreapi.com";
-  const apiUrl = "https://fakestoreapi.in/api";
+  const apiUrl = "https://fakestoreapi.com";
   useEffect(() => {
     const fetchProducts = async () => {
       try {

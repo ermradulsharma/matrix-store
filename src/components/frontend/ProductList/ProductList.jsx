@@ -10,7 +10,7 @@ function ProductList() {
   const [productsPerPage] = useState(8);
 
   // const apiUrl = "https://fakestoreapi.com";
-  const apiUrl = "https://fakestoreapi.in/api";
+  const apiUrl = "https://fakestoreapi.com";
   useEffect(() => {
     const fetchProducts = async () => {
       try {
