@@ -1,26 +1,41 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Button, Badge, Spinner } from 'react-bootstrap';
-import { fetchUsers } from '../../../services/api';
-import { FaUserTie, FaEdit, FaTrash } from 'react-icons/fa';
+import { fetchUsers, deleteUserProfile } from '../../../services/api';
+import { FaTrash, FaUserTie, FaEye } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const ManagerList = () => {
     const [managers, setManagers] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        loadManagers();
-    }, []);
-
-    const loadManagers = async () => {
+    const loadManagers = useCallback(async () => {
+        setLoading(true);
         try {
             const res = await fetchUsers();
             if (res.data.success) {
-                setManagers(res.data.users.filter(u => u.role === 'manager'));
+                setManagers(res.data.users.filter(user => user.role === 'manager'));
             }
         } catch (error) {
             console.error('Error loading managers:', error);
         } finally {
             setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        loadManagers();
+    }, [loadManagers]);
+
+    const deleteUser = async (id) => {
+        if (window.confirm('Are you sure you want to remove this manager?')) {
+            try {
+                // Use the standard deleteUserProfile function
+                await deleteUserProfile(id);
+                loadManagers(); // Refresh list
+            } catch (error) {
+                console.error('Error deleting manager:', error);
+                alert('Failed to delete manager');
+            }
         }
     };
 
@@ -61,10 +76,10 @@ const ManagerList = () => {
                                         <td>{manager.managedBy?.first_name || 'N/A'}</td>
                                         <td>
                                             <div className="btn-group">
-                                                <Button variant="outline-primary" size="sm">
-                                                    <FaEdit />
-                                                </Button>
-                                                <Button variant="outline-danger" size="sm">
+                                                <Link to={`/dashboard/user/${manager._id}`} className="btn btn-sm btn-info text-white me-2">
+                                                    <FaEye />
+                                                </Link>
+                                                <Button variant="danger" size="sm" onClick={() => deleteUser(manager._id)}>
                                                     <FaTrash />
                                                 </Button>
                                             </div>

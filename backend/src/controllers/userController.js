@@ -313,23 +313,53 @@ exports.createUser = catchAsyncError(async (req, res, next) => {
   });
 });
 
-// Get All Users (with Hierarchy)
+// Get Single User Details -- Admin/Super Admin
+exports.getSingleUser = catchAsyncError(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    return next(
+      new ErrorHandler(`User does not exist with Id: ${req.params.id}`, 404)
+    );
+  }
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+// Get All Users (with Hierarchy and Filtering)
 exports.getAllUsers = catchAsyncError(async (req, res, next) => {
   let filter = {};
   const role = req.user.role;
+  const queryRole = req.query.role; // Allow filtering by query param
 
   if (role === "super_admin") {
-    // Super Admin sees everyone
-    filter = {};
+    // Super Admin sees everyone, or filtered list if requested
+    if (queryRole) {
+      filter = { role: queryRole };
+    } else {
+      filter = {};
+    }
   } else if (role === "admin") {
     // Admin sees Managers, Providers, Customers
-    filter = { role: { $in: ["manager", "provider", "customer"] } };
+    // If queryRole is requested, ensure it's within allowed scope
+    const allowedRoles = ["manager", "provider", "customer"];
+    if (queryRole && allowedRoles.includes(queryRole)) {
+      filter = { role: queryRole };
+    } else {
+      filter = { role: { $in: allowedRoles } };
+    }
   } else if (role === "manager") {
-    // Manager sees their Providers? Or just Providers and Customers generally?
-    // Assuming Manager sees Providers and Customers
-    filter = { role: { $in: ["provider", "customer"] } };
+    // Manager sees Providers and Customers
+    const allowedRoles = ["provider", "customer"];
+    if (queryRole && allowedRoles.includes(queryRole)) {
+      filter = { role: queryRole };
+    } else {
+      filter = { role: { $in: allowedRoles } };
+    }
   } else {
-    // Providers/Customers shouldn't reach here due to middleware, but safe fallback
     return next(new ErrorHandler("Not authorized to view users", 403));
   }
 

@@ -10,7 +10,8 @@ import {
     FaClipboardList,
     FaBuilding,
     FaChartLine,
-    FaSignOutAlt
+    FaSignOutAlt,
+    FaUser
 } from 'react-icons/fa';
 
 const Sidebar = () => {
@@ -30,8 +31,33 @@ const Sidebar = () => {
                             </Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Link to="/dashboard/super-admin/admins" className={`nav-link ${isActive('/dashboard/super-admin/admins') ? 'active' : ''}`}>
-                                <FaUsers className="me-2" /> Manage Admins
+                            <Link to="/dashboard/super-admin/reports" className={`nav-link ${isActive('/dashboard/super-admin/reports') ? 'active' : ''}`}>
+                                <FaFileInvoiceDollar className="me-2" /> Analytics & Reports
+                            </Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Link to="/dashboard/super-admin/products" className={`nav-link ${isActive('/dashboard/super-admin/products') ? 'active' : ''}`}>
+                                <FaBoxOpen className="me-2" /> Products
+                            </Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Link to="/dashboard/admin-list" className={`nav-link ${isActive('/dashboard/admin-list') ? 'active' : ''}`}>
+                                <FaUsers className="me-2" /> Admins
+                            </Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Link to="/dashboard/manager-list" className={`nav-link ${isActive('/dashboard/manager-list') ? 'active' : ''}`}>
+                                <FaUsers className="me-2" /> Managers
+                            </Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Link to="/dashboard/provider-list" className={`nav-link ${isActive('/dashboard/provider-list') ? 'active' : ''}`}>
+                                <FaUsers className="me-2" /> Providers
+                            </Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Link to="/dashboard/customer-list" className={`nav-link ${isActive('/dashboard/customer-list') ? 'active' : ''}`}>
+                                <FaUsers className="me-2" /> Customers
                             </Link>
                         </Nav.Item>
                     </>
@@ -67,6 +93,11 @@ const Sidebar = () => {
                         <Nav.Item>
                             <Link to="/dashboard/manager/providers" className={`nav-link ${isActive('/dashboard/manager/providers') ? 'active' : ''}`}>
                                 <FaBuilding className="me-2" /> Providers
+                            </Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Link to="/dashboard/manager/customers" className={`nav-link ${isActive('/dashboard/manager/customers') ? 'active' : ''}`}>
+                                <FaUsers className="me-2" /> Customers
                             </Link>
                         </Nav.Item>
                         <Nav.Item>
@@ -128,12 +159,19 @@ const Sidebar = () => {
             <Nav className="flex-column mb-auto">
                 {renderNavItems()}
             </Nav>
-            <hr />
-            <Nav className="flex-column">
+
+            <hr className="my-2" />
+
+            <Nav className="flex-column mb-4">
                 <Nav.Item>
-                    <Nav.Link onClick={logout} className="text-danger" style={{ cursor: 'pointer' }}>
-                        <FaSignOutAlt className="me-2" /> Sign out
-                    </Nav.Link>
+                    <Link to="/dashboard/profile" className={`nav-link ${isActive('/dashboard/profile') ? 'active' : ''}`}>
+                        <FaUser className="me-2" /> My Profile
+                    </Link>
+                </Nav.Item>
+                <Nav.Item>
+                    <button className="nav-link btn btn-link text-start text-danger" onClick={logout}>
+                        <FaSignOutAlt className="me-2" /> Logout
+                    </button>
                 </Nav.Item>
             </Nav>
         </div>

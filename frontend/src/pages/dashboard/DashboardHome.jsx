@@ -1,8 +1,14 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 
+import SystemOverview from './SuperAdmin/SystemOverview';
+
 const DashboardHome = () => {
     const { user } = useAuth();
+
+    if (user?.role === 'super_admin') {
+        return <SystemOverview />;
+    }
 
     return (
         <div className="container-fluid">

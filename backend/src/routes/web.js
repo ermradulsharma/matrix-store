@@ -6,6 +6,7 @@ const productController = require("../controllers/productController");
 const providerController = require("../controllers/providerController");
 const requirementController = require("../controllers/requirementController");
 const invoiceController = require("../controllers/invoiceController");
+const orderController = require("../controllers/orderController");
 const {
   isauthenticate,
   isAuthorizedRoles,
@@ -23,6 +24,21 @@ router.put("/password/change", isauthenticate, userController.changePassword);
 router.get("/profile", isauthenticate, userController.userProfile);
 router.put("/profile/update", isauthenticate, userController.updateProfile);
 
+// Dashboard Stats
+const dashboardController = require("../controllers/dashboardController");
+router.get(
+  "/admin/stats",
+  isauthenticate,
+  isAuthorizedRoles("super_admin", "admin"),
+  dashboardController.getSuperAdminStats
+);
+router.get(
+  "/admin/analytics",
+  isauthenticate,
+  isAuthorizedRoles("super_admin", "admin"),
+  dashboardController.getAdvancedStats
+);
+
 // Admin User Management
 router.get(
   "/admin/users",
@@ -30,6 +46,14 @@ router.get(
   isAuthorizedRoles("admin", "super_admin", "manager"),
   userController.getAllUsers
 );
+
+router.get(
+  "/admin/user/:id",
+  isauthenticate,
+  isAuthorizedRoles("admin", "super_admin", "manager"),
+  userController.getSingleUser
+);
+
 router.post(
   "/admin/user/new",
   isauthenticate,

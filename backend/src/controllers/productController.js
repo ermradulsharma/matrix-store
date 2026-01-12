@@ -19,7 +19,10 @@ exports.getAllProducts = catchAsyncError(async (req, res) => {
     .search()
     .filter()
     .pagination(resultPerPage);
-  const products = await apiFeatures.query;
+  const products = await apiFeatures.query.populate(
+    "user_id",
+    "name email role"
+  );
   res.status(200).json({
     success: true,
     products,

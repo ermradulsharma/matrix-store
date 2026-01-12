@@ -1,29 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Button, Badge, Spinner } from 'react-bootstrap';
 import { fetchProviders, deactivateProvider } from '../../../services/api';
 import { Link } from 'react-router-dom';
-import { FaPlus, FaBan, FaEye } from 'react-icons/fa';
+import { FaPlus, FaEye } from 'react-icons/fa';
 
 const ProviderList = () => {
     const [providers, setProviders] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        loadProviders();
-    }, []);
-
-    const loadProviders = async () => {
+    const loadProviders = useCallback(async () => {
+        setLoading(true);
         try {
             const res = await fetchProviders();
-            if (res.data.success) {
-                setProviders(res.data.providers);
-            }
+            // fetchProviders calls /providers which usually returns only providers or needs filtering?
+            // api.js: export const fetchProviders = () => api.get("/providers");
+            // Assuming it returns correct data structure
+            setProviders(res.data.providers || []);
         } catch (error) {
             console.error('Error loading providers:', error);
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        loadProviders();
+    }, [loadProviders]);
 
     const handleDeactivate = async (id) => {
         if (window.confirm('Are you sure you want to deactivate this provider?')) {
@@ -75,11 +77,11 @@ const ProviderList = () => {
                                         <td>{provider.rating} / 5</td>
                                         <td>
                                             <div className="btn-group">
-                                                <Link to={`/dashboard/manager/provider/${provider._id}`} className="btn btn-sm btn-outline-info">
+                                                <Link to={`/dashboard/user/${provider.user?._id}`} className="btn btn-sm btn-info text-white me-2">
                                                     <FaEye />
                                                 </Link>
-                                                <Button variant="outline-danger" size="sm" onClick={() => handleDeactivate(provider._id)}>
-                                                    <FaBan />
+                                                <Button variant="warning" size="sm" onClick={() => handleDeactivate(provider._id)}>
+                                                    Deactivate
                                                 </Button>
                                             </div>
                                         </td>

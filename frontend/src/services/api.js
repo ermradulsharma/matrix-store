@@ -137,6 +137,17 @@ export const updateUserProfile = async (profileData) => {
   }
 };
 
+/** Get specific user details (Admin) */
+export const fetchUserDetails = async (id) => {
+  try {
+    const res = await api.get(`/admin/user/${id}`);
+    return res.data.user;
+  } catch (error) {
+    console.error(`Error fetching user ${id}:`, error);
+    throw error;
+  }
+};
+
 // ============= PRODUCTS =============
 
 /**
@@ -266,6 +277,15 @@ export const deleteProduct = async (id) => {
 
 // ============= ORDERS =============
 
+// ============= DASHBOARD =============
+export const fetchDashboardStats = async () => {
+  return await api.get("/admin/stats");
+};
+
+export const fetchAdvancedStats = async (period = "monthly") => {
+  return await api.get("/admin/analytics", { params: { period } });
+};
+
 /** Submit a new order */
 export const submitOrder = async (orderData) => {
   try {
@@ -366,6 +386,7 @@ export const rejectInvoice = (id, reason) =>
 export const markInvoicePaid = (id, data) =>
   api.put(`/invoice/${id}/mark-paid`, data);
 
-export const fetchUsers = () => api.get("/users");
+export const fetchUsers = () => api.get("/admin/users");
+export const deleteUserProfile = (id) => api.delete(`/admin/user/${id}`);
 
 export default api;

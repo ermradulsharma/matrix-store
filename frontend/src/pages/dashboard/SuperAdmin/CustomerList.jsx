@@ -1,39 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Badge, Spinner } from 'react-bootstrap';
 import { fetchUsers } from '../../../services/api';
-import { FaUserShield, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
-const AdminList = () => {
-    const [admins, setAdmins] = useState([]);
+const CustomerList = () => {
+    const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const loadAdmins = React.useCallback(async () => {
+    useEffect(() => {
+        loadCustomers();
+    }, []);
+
+    const loadCustomers = async () => {
         try {
+            // Ideally passing role query param if fetchUsers supports it, 
+            // otherwise client-side filter
             const res = await fetchUsers();
             if (res.data.success) {
-                setAdmins(res.data.users.filter(u => u.role === 'admin'));
+                setCustomers(res.data.users.filter(u => u.role === 'customer'));
             }
         } catch (error) {
-            console.error('Error loading admins:', error);
+            console.error('Error loading customers:', error);
         } finally {
             setLoading(false);
         }
-    }, []);
-
-    useEffect(() => {
-        loadAdmins();
-    }, [loadAdmins]);
+    };
 
     if (loading) return <div className="text-center p-5"><Spinner animation="border" /></div>;
 
     return (
         <div className="container-fluid">
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>Manage Admins</h2>
-                <Button variant="primary">
-                    <FaUserShield className="me-2" /> Create New Admin
-                </Button>
+                <h2>Manage Customers</h2>
+                {/* No create button for customers usually */}
             </div>
 
             <div className="card shadow-sm">
@@ -44,25 +44,25 @@ const AdminList = () => {
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Status</th>
-                                <th>Last Login</th>
+                                <th>Joined Date</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {admins.length > 0 ? (
-                                admins.map(admin => (
-                                    <tr key={admin._id}>
-                                        <td>{admin.first_name} {admin.last_name}</td>
-                                        <td>{admin.email}</td>
+                            {customers.length > 0 ? (
+                                customers.map(customer => (
+                                    <tr key={customer._id}>
+                                        <td>{customer.first_name} {customer.last_name}</td>
+                                        <td>{customer.email}</td>
                                         <td>
-                                            <Badge bg={admin.isActive ? 'success' : 'danger'}>
-                                                {admin.isActive ? 'Active' : 'Inactive'}
+                                            <Badge bg={customer.isActive ? 'success' : 'danger'}>
+                                                {customer.isActive ? 'Active' : 'Inactive'}
                                             </Badge>
                                         </td>
-                                        <td>{admin.lastLogin ? new Date(admin.lastLogin).toLocaleDateString() : 'Never'}</td>
+                                        <td>{new Date(customer.createdAt).toLocaleDateString()}</td>
                                         <td>
                                             <div className="btn-group">
-                                                <Link to={`/dashboard/user/${admin._id}`} className="btn btn-sm btn-info text-white me-2">
+                                                <Link to={`/dashboard/user/${customer._id}`} className="btn btn-sm btn-info text-white me-2">
                                                     <FaEye />
                                                 </Link>
                                                 <Button variant="outline-primary" size="sm">
@@ -77,7 +77,7 @@ const AdminList = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="5" className="text-center py-4">No admins found</td>
+                                    <td colSpan="5" className="text-center py-4">No customers found</td>
                                 </tr>
                             )}
                         </tbody>
@@ -88,4 +88,4 @@ const AdminList = () => {
     );
 };
 
-export default AdminList;
+export default CustomerList;
