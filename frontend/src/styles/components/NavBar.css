@@ -1,0 +1,219 @@
+/* Modern NavBar Styles */
+.modern-navbar {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    padding: 0.75rem 0;
+    transition: all 0.3s ease;
+}
+
+.modern-navbar.navbar {
+    backdrop-filter: blur(10px);
+}
+
+/* Brand Logo */
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: white !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.brand-logo:hover {
+    transform: translateY(-2px);
+    color: #fbbf24 !important;
+}
+
+.brand-icon {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.brand-text {
+    background: linear-gradient(135deg, #fff 0%, #fbbf24 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Navigation Links */
+.nav-links {
+    gap: 0.5rem;
+}
+
+.nav-item-custom {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 0.5rem 1rem !important;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.nav-item-custom:hover {
+    color: white !important;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.nav-item-custom.active {
+    background: rgba(255, 255, 255, 0.15);
+    color: white !important;
+}
+
+/* Icon Links */
+.nav-icons {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.icon-link {
+    color: white !important;
+    padding: 0.5rem !important;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
+}
+
+.icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    font-size: 0.65rem;
+    padding: 0.25em 0.5em;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* User Dropdown */
+.user-dropdown .dropdown-toggle {
+    color: white !important;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    padding: 0.5rem 1rem !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.user-dropdown .dropdown-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.user-dropdown .dropdown-toggle::after {
+    margin-left: 0.5rem;
+}
+
+.user-dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.user-dropdown .dropdown-menu {
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border: none;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.user-dropdown .dropdown-item {
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.user-dropdown .dropdown-item:hover {
+    background: #f3f4f6;
+    transform: translateX(4px);
+}
+
+.user-dropdown .dropdown-divider {
+    margin: 0.5rem 0;
+}
+
+/* Login Button */
+.login-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    padding: 0.5rem 1.25rem !important;
+    color: white !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.login-btn:hover {
+    background: white;
+    color: #3b82f6 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Navbar Toggle */
+.navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.3);
+    padding: 0.5rem;
+}
+
+.navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .nav-links {
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 1rem;
+    }
+
+    .nav-icons {
+        padding: 0.5rem 0;
+    }
+
+    .nav-item-custom {
+        padding: 0.75rem 1rem !important;
+    }
+
+    .login-btn,
+    .user-dropdown .dropdown-toggle {
+        width: 100%;
+        justify-content: center;
+        margin-top: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .brand-text {
+        font-size: 1.25rem;
+    }
+}

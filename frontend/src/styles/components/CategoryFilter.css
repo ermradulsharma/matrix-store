@@ -1,0 +1,7 @@
+.category-filter {
+    max-width: 250px;
+}
+
+.category-filter option {
+    text-transform: capitalize;
+}

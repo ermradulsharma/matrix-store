@@ -1,0 +1,46 @@
+/* Contact Page Styles */
+.contact-page {
+    background-color: #f5f7fa;
+    min-height: 80vh;
+}
+
+.contact-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: 0 0 20px 20px;
+    margin-bottom: 3rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.contact-header h1 {
+    color: white;
+    font-weight: 700;
+}
+
+.contact-info-card {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.contact-info-item {
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.contact-info-item h5 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.contact-form-card {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.contact-form-card h3 {
+    color: #2c3e50;
+}

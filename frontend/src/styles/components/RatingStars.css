@@ -1,0 +1,9 @@
+.rating-stars {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.rating-stars svg {
+    flex-shrink: 0;
+}

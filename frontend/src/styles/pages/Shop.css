@@ -1,0 +1,241 @@
+/* Shop/Product Page Styles */
+.shop-page {
+    background: #f9fafb;
+    min-height: 100vh;
+}
+
+.shop-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 3rem 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.shop-header h1 {
+    color: white;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.shop-header p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+/* Filters Sidebar */
+.filters-sidebar {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    position: sticky;
+    top: 20px;
+}
+
+.filters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.filters-header h5 {
+    margin: 0;
+    font-weight: 700;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+}
+
+.filters-header .btn-link {
+    padding: 0;
+    text-decoration: none;
+    font-size: 0.85rem;
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+.filters-header .btn-link:hover {
+    color: #2563eb;
+    text-decoration: underline;
+}
+
+.filter-section {
+    margin-bottom: 1.5rem;
+}
+
+.filter-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 0.75rem;
+}
+
+.filter-section .form-check {
+    margin-bottom: 0.5rem;
+}
+
+.filter-section .form-check-label {
+    font-size: 0.9rem;
+    color: #4b5563;
+    cursor: pointer;
+}
+
+.filter-section .form-check-input:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.filter-section .form-select {
+    border-radius: 8px;
+    border-color: #d1d5db;
+    font-size: 0.9rem;
+}
+
+.filter-section .form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+}
+
+/* Toolbar */
+.products-toolbar {
+    background: white;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.toolbar-left,
+.toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.results-count {
+    font-size: 0.95rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.sort-select {
+    min-width: 180px;
+    border-radius: 8px;
+    border-color: #d1d5db;
+}
+
+.sort-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+}
+
+.view-toggle .btn {
+    border-radius: 8px;
+}
+
+.view-toggle .btn:first-child {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.view-toggle .btn:last-child {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* Products Grid */
+.products-grid {
+    animation: fadeIn 0.5s ease-in;
+}
+
+.products-list .product-card {
+    display: flex;
+    flex-direction: row;
+}
+
+.products-list .product-card-image-container {
+    max-width: 250px;
+    flex-shrink: 0;
+}
+
+.products-list .product-card-body {
+    flex: 1;
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* No Products */
+.no-products {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.no-products h4 {
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.no-products p {
+    color: #6b7280;
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .filters-sidebar {
+        position: static;
+    }
+
+    .shop-header {
+        padding: 2rem 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .products-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .toolbar-left,
+    .toolbar-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .sort-select {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .shop-header h1 {
+        font-size: 1.75rem;
+    }
+}

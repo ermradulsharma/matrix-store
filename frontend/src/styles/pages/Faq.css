@@ -1,0 +1,42 @@
+/* FAQ Page Styles */
+.faq-page {
+    background-color: #f5f7fa;
+    min-height: 80vh;
+}
+
+.faq-header {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: 0 0 20px 20px;
+    margin-bottom: 3rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.faq-header h1 {
+    color: white;
+    font-weight: 700;
+}
+
+.faq-card {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.accordion-item {
+    border-radius: 8px !important;
+    margin-bottom: 0.5rem;
+    border: 1px solid #e0e0e0 !important;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #667eea;
+    color: white;
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: #667eea;
+}

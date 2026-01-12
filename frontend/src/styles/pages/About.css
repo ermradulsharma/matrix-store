@@ -1,0 +1,49 @@
+/* About Page Styles */
+.about-page {
+    background-color: #f5f7fa;
+    min-height: 80vh;
+}
+
+.about-header {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: 0 0 20px 20px;
+    margin-bottom: 3rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.about-header h1 {
+    color: white;
+    font-weight: 700;
+}
+
+.about-stats-card {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.about-stats-card h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+}
+
+.about-stats-card p {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.value-card {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.value-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}

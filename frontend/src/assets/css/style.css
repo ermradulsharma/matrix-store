@@ -1,0 +1,23 @@
+/* Custom CSS */
+ul.list-group {}
+
+.list-group li {
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.list-group li:hover {
+    background: transparent;
+    color: #ff0015;
+}
+
+.contact-details {
+    /* padding-left: 7rem; */
+}
+
+.contact-details p {
+    margin-bottom: 0px;
+}
+
