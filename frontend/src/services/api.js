@@ -90,7 +90,8 @@ export const verifyOtp = async (mobile, otp) => {
 /** User registration */
 export const registerUser = async (userData) => {
   try {
-    const res = await api.post("/registration", userData);
+    // UPDATED: Endpoint changed from /registration to /register
+    const res = await api.post("/register", userData);
     if (res.data.success && res.data.token) {
       localStorage.setItem("authToken", res.data.token);
     }
@@ -152,7 +153,8 @@ export const fetchProducts = async ({
     if (search) params.keyword = search;
     if (category) params.category = category;
 
-    const res = await api.get("/get-products", { params });
+    // UPDATED: Endpoint changed from /get-products to /products
+    const res = await api.get("/products", { params });
 
     // Backend returns { success, products, message }
     // Transform to match expected format with pagination
@@ -172,7 +174,8 @@ export const fetchProducts = async ({
 /** Fetch a single product by its ID */
 export const fetchProductById = async (id) => {
   try {
-    const res = await api.get(`/get-product-details/${id}`);
+    // UPDATED: Endpoint changed from /get-product-details/${id} to /product/${id}
+    const res = await api.get(`/product/${id}`);
     return res.data.product;
   } catch (error) {
     console.error(`Error fetching product ${id}:`, error);
@@ -185,7 +188,8 @@ export const fetchProductById = async (id) => {
 /** Fetch all product categories */
 export const fetchCategories = async () => {
   try {
-    const res = await api.get("/get-category");
+    // UPDATED: Endpoint changed from /get-category to /categories
+    const res = await api.get("/categories");
     // Backend returns { success, categories }
     return res.data.categories || [];
   } catch (error) {
@@ -199,7 +203,12 @@ export const fetchCategories = async () => {
 /** Submit a product review */
 export const submitProductReview = async (reviewData) => {
   try {
-    const res = await api.put("/review", reviewData);
+    // UPDATED: Endpoint changed to match router /product/review/:id
+    // reviewData should contain productId
+    const res = await api.put(
+      `/product/review/${reviewData.productId}`,
+      reviewData
+    );
     return res.data;
   } catch (error) {
     console.error("Error submitting review:", error);
@@ -210,7 +219,8 @@ export const submitProductReview = async (reviewData) => {
 /** Get product reviews */
 export const getProductReviews = async (productId) => {
   try {
-    const res = await api.get("/get-reviews", { params: { productId } });
+    // UPDATED: Endpoint changed from /get-reviews to /product/reviews/${productId}
+    const res = await api.get(`/product/reviews/${productId}`);
     return res.data.reviews || [];
   } catch (error) {
     console.error("Error fetching reviews:", error);
@@ -220,18 +230,106 @@ export const getProductReviews = async (productId) => {
 
 // ============= ORDERS =============
 
-/** Submit an order (placeholder - backend doesn't have order endpoint yet) */
+// ============= PRODUCT MANAGEMENT (ADMIN) =============
+
+export const createProduct = async (productData) => {
+  try {
+    const config = { headers: { "Content-Type": "application/json" } };
+    const res = await api.post(`/product/new`, productData, config);
+    return res.data;
+  } catch (error) {
+    console.error("Error creating product:", error);
+    throw error;
+  }
+};
+
+export const updateProduct = async (id, productData) => {
+  try {
+    const config = { headers: { "Content-Type": "application/json" } };
+    const res = await api.put(`/product/${id}`, productData, config);
+    return res.data;
+  } catch (error) {
+    console.error("Error updating product:", error);
+    throw error;
+  }
+};
+
+export const deleteProduct = async (id) => {
+  try {
+    const res = await api.delete(`/product/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    throw error;
+  }
+};
+
+// ============= ORDERS =============
+
+/** Submit a new order */
 export const submitOrder = async (orderData) => {
   try {
-    // For now, just return success since backend doesn't have order endpoint
-    console.warn("Order endpoint not implemented in backend yet");
-    return {
-      success: true,
-      message: "Order placed successfully",
-      orderId: Date.now(),
-    };
+    const config = { headers: { "Content-Type": "application/json" } };
+    const res = await api.post("/order/new", orderData, config);
+    return res.data;
   } catch (error) {
     console.error("Error submitting order:", error);
+    throw error;
+  }
+};
+
+/** Get logged in user's orders */
+export const getMyOrders = async () => {
+  try {
+    const res = await api.get("/orders/me");
+    return res.data.orders;
+  } catch (error) {
+    console.error("Error fetching my orders:", error);
+    throw error;
+  }
+};
+
+/** Get order details */
+export const getOrderDetails = async (id) => {
+  try {
+    const res = await api.get(`/order/${id}`);
+    return res.data.order;
+  } catch (error) {
+    console.error("Error fetching order details:", error);
+    throw error;
+  }
+};
+
+/** Get all orders (Admin) */
+export const getAllOrders = async () => {
+  try {
+    const res = await api.get("/admin/orders");
+    return res.data.orders;
+  } catch (error) {
+    console.error("Error fetching all orders:", error);
+    throw error;
+  }
+};
+
+/** Update order status (Admin) */
+export const updateOrder = async (id, orderData) => {
+  try {
+    const config = { headers: { "Content-Type": "application/json" } };
+    const res = await api.put(`/admin/order/${id}`, orderData, config);
+    return res.data;
+  } catch (error) {
+    console.error("Error updating order:", error);
+    throw error;
+  }
+};
+
+/** Delete order (Admin) */
+export const deleteOrder = async (id) => {
+  try {
+    const res = await api.delete(`/admin/order/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error("Error deleting order:", error);
     throw error;
   }
 };

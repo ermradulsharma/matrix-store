@@ -1,0 +1,16 @@
+{
+  "name": "matrix-store-root",
+  "version": "1.0.0",
+  "description": "Root script to run both backend and frontend applications concurrently.",
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm run dev",
+    "client": "cd frontend && npm start",
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+  },
+  "author": "Mradul Sharma",
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
