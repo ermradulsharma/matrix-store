@@ -1,29 +1,43 @@
 # Matrix Store
 
-Matrix Store is a modern, full-featured e-commerce platform built with the MERN stack (MongoDB, Express, React, Node.js). It provides a seamless shopping experience for users and a robust management interface for administrators.
+Matrix Store is a modern, full-stack e-commerce platform built with the MERN stack (MongoDB, Express, React, Node.js). It features a robust multi-role dashboard for Super Admins, Admins, Managers, and Providers, along with a seamless shopping experience for Customers.
 
 ## Features
 
-- **User Authentication**: Secure sign-up and login functionality using JWT.
-- **Product Management**: Browse, search, and filter a wide range of products.
-- **Shopping Cart**: Add products to the cart, manage quantities, and proceed to checkout.
-- **Order Processing**: Streamlined checkout process with address management.
-- **Admin Dashboard**: Manage products, users, and orders (if applicable).
-- **Responsive Design**: Fully responsive UI built with React and Bootstrap.
+- **Role-Based Access Control (RBAC)**: secure hierarchy with 5 distinct roles:
+  - **Super Admin**: Full system control, manage all users including Admins.
+  - **Admin**: Oversee Managers, Providers, and Customers.
+  - **Manager**: Manage assigned Providers and specialized workflows.
+  - **Provider**: Manage products and view assigned requirements.
+  - **Customer**: Browse products, place orders, and manage personal profile.
+- **Advanced Dashboard**:
+  - **System Overview**: Graphical charts for revenue, order status, and user distribution.
+  - **User Management**: Dedicated lists with "View Profile" functionality for all roles.
+  - **Analytics**: Detailed reports and performance metrics.
+- **Product Management**: Create, update, and manage inventory with image support.
+- **Order Processing**: Complete checkout flow, order tracking, and status updates.
+- **Authentication**: Secure JWT-based auth with HTTP-only cookies and password encryption.
 
 ## Tech Stack
 
-- **Frontend**: React, React Router, Redux (if used) / Context API, Bootstrap, React Bootstrap.
-- **Backend**: Node.js, Express.js.
-- **Database**: MongoDB with Mongoose.
-- **Authentication**: JSON Web Tokens (JWT), Bcrypt.
+- **Frontend**:
+  - React.js (v18)
+  - React Router DOM (v6)
+  - Context API (Auth, Cart, Wishlist)
+  - React Bootstrap & Bootstrap 5
+  - Recharts (for Dashboard Analytics)
+  - React Icons
+- **Backend**:
+  - Node.js & Express.js
+  - MongoDB & Mongoose
+  - JSON Web Tokens (JWT)
+  - BcryptJS (Password Hashing)
+  - Dotenv (Environment Variables)
 
 ## Prerequisites
 
-Before you begin, ensure you have the following installed:
-
-- [Node.js](https://nodejs.org/) (v14 or higher recommended)
-- [MongoDB](https://www.mongodb.com/) (Local or Atlas)
+- [Node.js](https://nodejs.org/) (v16 or higher)
+- [MongoDB](https://www.mongodb.com/) (Local or Atlas connection string)
 - [Git](https://git-scm.com/)
 
 ## Installation
@@ -51,59 +65,86 @@ Before you begin, ensure you have the following installed:
 
 ## Configuration
 
-Create a `.env` file in the `backend` directory and configure the following variables:
+Create a `.env` file in the `backend` directory with the following keys:
 
 ```env
 PORT=5000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret_key
-# Add other necessary variables here (e.g., SMTP for emails, Payment Gateway keys)
+DB_URI=mongodb://127.0.0.1:27017/matrix-store
+JWT_SECRET=your_super_secret_key_here
+JWT_EXPIRE=7d
+COOKIE_EXPIRE=7d
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SERVICE=gmail
+SMTP_MAIL=your_email@gmail.com
+SMTP_PASSWORD=your_app_specific_password
 ```
 
 ## Usage
 
-### Running the Backend
+### 1. Seed Database
 
-From the `backend` directory:
-
-```bash
-# Start in production mode
-npm start
-
-# Start in development mode (with Nodemon)
-npm run dev
-```
-
-### Running the Frontend
-
-From the `frontend` directory:
-
-```bash
-npm start
-```
-
-The frontend application will run on `http://localhost:3000` and the backend server on `http://localhost:5000`.
-
-### Database Seeding
-
-To seed the database with initial data (roles and products):
+Initialize the database with default roles and demo data (Users, Products, Orders).
 
 ```bash
 cd backend
-npm run seed        # Seeds roles
-npm run seed:products # Seeds products
+# Seed Roles (Required first)
+npm run seed
+
+# Seed Full Demo Data (Users, Products, Orders)
+node create_full_demo_data.js
+```
+
+### 2. Start Backend Server
+
+```bash
+cd backend
+npm run dev
+# Server runs on http://localhost:5000
+```
+
+### 3. Start Frontend Application
+
+```bash
+cd frontend
+npm start
+# App runs on http://localhost:3000
+```
+
+## Project Structure
+
+```
+matrix-store/
+├── backend/
+│   ├── src/
+│   │   ├── controllers/   # Route Controllers
+│   │   ├── models/        # Mongoose Models (User, Product, Order, etc.)
+│   │   ├── routes/        # API Routes
+│   │   ├── seeder/        # Database Seed scripts
+│   │   └── utils/         # Helper functions (JWT, Email, ErrorHandler)
+│   ├── config/            # DB Connection logic
+│   └── index.js           # App Entry point
+└── frontend/
+    ├── src/
+    │   ├── context/       # React Context (Auth, Cart, Wishlist)
+    │   ├── pages/
+    │   │   ├── dashboard/ # Dashboard Modules (SuperAdmin, Admin, Manager, Provider)
+    │   │   └── frontend/  # Public Store pages (Home, Shop, Cart)
+    │   └── services/      # Axios API definition
+    └── App.js             # Main Router
 ```
 
 ## Contributing
 
-We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to submit pull requests and report issues.
+We welcome contributions! Please check [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the ISC License. See [LICENSE](LICENSE) file for more details.
 
 ## Contact
 
 **Mradul Sharma**
 
 - GitHub: [@ermradulsharma](https://github.com/ermradulsharma)
+- LinkedIn: [Mradul Sharma](https://linkedin.com/in/mradulsharma)

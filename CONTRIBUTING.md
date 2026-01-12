@@ -26,18 +26,12 @@ This section guides you through submitting an enhancement suggestion for Matrix 
 
 ### Pull Requests
 
-- Fill in the required template
-- Do not include issue numbers in the PR title
-- Include screenshots and animated GIFs in your pull request whenever possible.
-- Follow the existing code style.
-
-## Development Setup
-
 1.  Fork the repo and create your branch from `main`.
 2.  If you've added code that should be tested, add tests.
 3.  Ensure the test suite passes.
 4.  Make sure your code lints.
+5.  Submit the PR!
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under its GNU General Public License v3.0.
+By contributing, you agree that your contributions will be licensed under the project's ISC License.
