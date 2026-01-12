@@ -1,6 +1,6 @@
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncError = require("../middlewares/catchAsyncErrors");
-const User = require("../models/User"); // It should be 'User' instead of 'user'
+const User = require("../models/User");
 const sendToken = require("../utils/jwtToken");
 const sendEmail = require("../utils/sendEmail");
 const crypto = require("crypto");
@@ -27,7 +27,7 @@ exports.userRegistration = catchAsyncError(async (req, res, next) => {
             username = `${first_name.toLowerCase()}${counter}`;
         }
     }
-    
+
     const newUser = await User.create({
         server_address: server_address || "unknown",
         first_name,
@@ -47,25 +47,30 @@ exports.userRegistration = catchAsyncError(async (req, res, next) => {
 // User Login
 exports.loginUser = catchAsyncError(async (req, res, next) => {
     const { email, password } = req.body;
-    if (!email) {
-        return next(new ErrorHandler("Please Enter Email", 401));
-    }
-    if (!password) {
-        return next(new ErrorHandler("Please Enter Password", 401));
+    console.log('Login attempt:', { email, password });
+
+    // Checking if user has given password and email both
+    if (!email || !password) {
+        console.log('Missing email or password');
+        return next(new ErrorHandler("Please Enter Email and Password", 400));
     }
 
-    // Use 'User' instead of 'user' for finding the user
     const user = await User.findOne({ email }).select("+password");
+
     if (!user) {
-        return next(new ErrorHandler("Invalid credentials", 401));
+        console.log('User not found for email:', email);
+        return next(new ErrorHandler("Invalid email or password", 401));
     }
 
-    const isPasswordMatched = await user.comparePassword(password); // Use 'await' here
+    const isPasswordMatched = await user.comparePassword(password);
+    console.log('Password match result:', isPasswordMatched);
+
     if (!isPasswordMatched) {
-        return next(new ErrorHandler("Invalid Password Entered", 401));
+        console.log('Password mismatch');
+        return next(new ErrorHandler("Invalid email or password", 401));
     }
 
-    sendToken(user, 200, res); // Use 'user' here to send the token
+    sendToken(user, 200, res);
 });
 
 // Logout User
@@ -161,7 +166,7 @@ exports.changePassword = catchAsyncError(async (req, res, next) => {
 
 // User Profile
 exports.userProfile = catchAsyncError(async (req, res, next) => {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).select("+password");
     res.status(200).json({
         success: true,
         user,

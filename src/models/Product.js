@@ -13,7 +13,8 @@ const ProductSchema = new mongoose.Schema({
     price: {
         type: Number,
         required: [true, "Please Enter Product Price."],
-        maxLength: [8, "Price Can't exceed 8 characters"]
+        min: [0, "Price cannot be negative"],
+        max: [99999999, "Price is too high"]
     },
     ratings: {
         type: Number,
@@ -37,29 +38,29 @@ const ProductSchema = new mongoose.Schema({
     },
     brand: {
         type: String,
-        required: [true, "Please Enter Product Brand."]
+        required: false
     },
     model: {
         type: String,
-        required: [true, "Please Enter Product Model."]
+        required: false
     },
     dimensions: {
         width: {
             type: Number,
-            required: [true, "Please Enter Product Width."]
+            required: false
         },
         height: {
             type: Number,
-            required: [true, "Please Enter Product Height."]
+            required: false
         },
         depth: {
             type: Number,
-            required: [true, "Please Enter Product Depth."]
+            required: false
         }
     },
     weight: {
         type: Number,
-        required: [true, "Please Enter Product Weight."]
+        required: false
     },
 
     // Stock Details
@@ -67,7 +68,8 @@ const ProductSchema = new mongoose.Schema({
         type: Number,
         required: [true, "Please Enter Product Stock"],
         default: 1,
-        maxLength: [4, "Stock Can't exceed 4 characters"]
+        min: [0, "Stock cannot be negative"],
+        max: [9999, "Stock is too high"]
     },
 
     stockHistory: [
@@ -130,23 +132,23 @@ const ProductSchema = new mongoose.Schema({
         }
     ],
 
-    // Supplier Details (Optional but can be added for more information)
+    // Supplier Details (Optional)
     supplier: {
         name: {
             type: String,
-            required: [true, "Please Enter Supplier Name."]
+            required: false
         },
         contact: {
             type: String,
-            required: [true, "Please Enter Supplier Contact."]
+            required: false
         },
         email: {
             type: String,
-            required: [true, "Please Enter Supplier Email."]
+            required: false
         },
         address: {
             type: String,
-            required: [true, "Please Enter Supplier Address."]
+            required: false
         }
     },
 
@@ -162,11 +164,31 @@ const ProductSchema = new mongoose.Schema({
         ref: "User",
         required: true
     },
-
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
+    provider: {
+        type: mongoose.Schema.ObjectId,
+        ref: "Provider",
+        required: false
+    },
+    postedBy: {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+        required: false
+    },
+    approvalStatus: {
+        type: String,
+        enum: ['draft', 'pending_approval', 'approved', 'rejected'],
+        default: 'approved'
+    },
+    approvedBy: {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+        required: false
+    },
+    approvedAt: Date,
+    rejectedAt: Date,
+    rejectionReason: String
+}, {
+    timestamps: true
 });
 
 module.exports = mongoose.model("Product", ProductSchema);

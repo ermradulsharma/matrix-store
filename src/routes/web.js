@@ -1,63 +1,75 @@
 const express = require('express');
 const router = express.Router();
-
-// Import your controller or handlers
-const productController = require('../controllers/productController');
+const userController = require('../controllers/userController');
 const categoryController = require('../controllers/categoryController');
-const userController = require("../controllers/userController");
+const productController = require('../controllers/productController');
+const providerController = require('../controllers/providerController');
+const requirementController = require('../controllers/requirementController');
+const invoiceController = require('../controllers/invoiceController');
 const { isauthenticate, isAuthorizedRoles } = require('../middlewares/authentication');
 
-// Public Routes (No Authentication Required)
-
 // User Routes
-router.post('/registration', userController.userRegistration);
+router.post('/register', userController.userRegistration);
 router.post('/login', userController.loginUser);
+router.get('/logout', userController.logout);
 router.post('/password/forgot', userController.forgotPassword);
 router.put('/password/reset/:token', userController.resetPassword);
 
-// Category Routes
-router.get('/get-category', categoryController.getAllCategory);
+// Authenticated User Routes
+router.put('/password/change', isauthenticate, userController.changePassword);
+router.get('/profile', isauthenticate, userController.userProfile);
+router.put('/profile/update', isauthenticate, userController.updateProfile);
 
-// Product 
-router.get('/get-products', productController.getAllProducts);
-router.get('/get-product-details/:id', productController.getProductDetails);
-router.get('/get-reviews', productController.getProductReview);
-
-
-// Group of routes that require authentication
-const authenticatedRoutes = express.Router();
-authenticatedRoutes.use(isauthenticate);
-
-// User Route
-authenticatedRoutes.get('/logout', userController.logout);
-authenticatedRoutes.put('/password/update', userController.changePassword);
-authenticatedRoutes.get('/profile', userController.userProfile);
-authenticatedRoutes.put('/profile/update', userController.updateProfile); // When user or admin update own profile
-
-// Product Routs
-authenticatedRoutes.put('/review', productController.productReview);
-
-
-// Admin Access Routes
-// For Users
-authenticatedRoutes.put('/update/user/:id', isAuthorizedRoles("admin"), userController.updateProfile); // When admin update user profile
-// authenticatedRoutes.put('/update/user/:id', isAuthorizedRoles("admin"), userController.updateUserProfile);
-authenticatedRoutes.delete('/delete/user/:id', isAuthorizedRoles("admin"), userController.deleteUserProfile);
-authenticatedRoutes.get('/get/users', isAuthorizedRoles("admin"), userController.getAllUsers)
+// Admin User Management
+router.get('/admin/users', isauthenticate, isAuthorizedRoles('admin', 'super_admin'), userController.getAllUsers);
+router.put('/admin/user/:id', isauthenticate, isAuthorizedRoles('admin', 'super_admin'), userController.updateProfile);
+router.delete('/admin/user/:id', isauthenticate, isAuthorizedRoles('admin', 'super_admin'), userController.deleteUserProfile);
 
 // Category Routes
-authenticatedRoutes.post('/create-category', categoryController.createCategory);
-authenticatedRoutes.get('/category-details/:id', categoryController.getCategoryDetails);
-authenticatedRoutes.patch('/update-category/:id', categoryController.updateCategory);
-authenticatedRoutes.delete('/delete-category/:id', categoryController.deleteCategory);
+router.post('/category/new', isauthenticate, isAuthorizedRoles('admin', 'super_admin'), categoryController.createCategory);
+router.get('/categories', categoryController.getAllCategory);
+router.get('/category/:id', categoryController.getCategoryDetails);
+router.put('/category/:id', isauthenticate, isAuthorizedRoles('admin', 'super_admin'), categoryController.updateCategory);
+router.delete('/category/:id', isauthenticate, isAuthorizedRoles('admin', 'super_admin'), categoryController.deleteCategory);
 
-// For Products
-authenticatedRoutes.post('/create-product', isAuthorizedRoles("admin"), productController.createProduct);
-authenticatedRoutes.put('/update-product/:id', isAuthorizedRoles("admin"), productController.updateProduct);
-authenticatedRoutes.delete('/delete-product/:id', isAuthorizedRoles("admin"), productController.deleteProduct);
-authenticatedRoutes.delete('/delete-reviews', isAuthorizedRoles("admin"), productController.deleteProductReviews);
+// Product Routes (Public)
+router.get('/products', productController.getAllProducts);
+router.get('/product/:id', productController.getProductDetails);
 
-// Attach the authenticated routes to the main router
-router.use(authenticatedRoutes);
+// Product Routes (Authenticated)
+router.post('/product/new', isauthenticate, isAuthorizedRoles('admin', 'manager', 'super_admin'), productController.createProduct);
+router.put('/product/:id', isauthenticate, isAuthorizedRoles('admin', 'manager', 'super_admin'), productController.updateProduct);
+router.delete('/product/:id', isauthenticate, isAuthorizedRoles('admin', 'super_admin'), productController.deleteProduct);
 
-module.exports = router
+// Product Reviews
+router.put('/product/review/:id', isauthenticate, productController.productReview);
+router.get('/product/reviews/:id', productController.getProductReview);
+router.delete('/product/review/:id', isauthenticate, productController.deleteProductReviews);
+
+// Provider Management Routes (Manager/Admin)
+router.post('/provider/create', isauthenticate, isAuthorizedRoles('manager', 'admin', 'super_admin'), providerController.createProvider);
+router.get('/providers', isauthenticate, isAuthorizedRoles('manager', 'admin', 'super_admin'), providerController.getAllProviders);
+router.get('/provider/:id', isauthenticate, isAuthorizedRoles('manager', 'admin', 'super_admin', 'provider'), providerController.getProvider);
+router.put('/provider/:id', isauthenticate, isAuthorizedRoles('manager', 'admin', 'super_admin'), providerController.updateProvider);
+router.put('/provider/:id/deactivate', isauthenticate, isAuthorizedRoles('manager', 'admin', 'super_admin'), providerController.deactivateProvider);
+router.get('/provider/:id/performance', isauthenticate, isAuthorizedRoles('manager', 'admin', 'super_admin'), providerController.getProviderPerformance);
+
+// Requirement Routes
+router.post('/requirement/create', isauthenticate, isAuthorizedRoles('manager', 'admin', 'super_admin'), requirementController.createRequirement);
+router.get('/requirements', isauthenticate, isAuthorizedRoles('manager', 'admin', 'super_admin', 'provider'), requirementController.getAllRequirements);
+router.get('/requirement/:id', isauthenticate, isAuthorizedRoles('manager', 'admin', 'super_admin', 'provider'), requirementController.getRequirement);
+router.put('/requirement/:id/accept', isauthenticate, isAuthorizedRoles('provider'), requirementController.acceptRequirement);
+router.put('/requirement/:id/fulfill', isauthenticate, isAuthorizedRoles('provider'), requirementController.fulfillRequirement);
+router.put('/requirement/:id/reject', isauthenticate, isAuthorizedRoles('provider'), requirementController.rejectRequirement);
+router.post('/requirement/:id/note', isauthenticate, isAuthorizedRoles('manager', 'admin', 'super_admin', 'provider'), requirementController.addNote);
+
+// Invoice Routes
+router.post('/invoice/create', isauthenticate, isAuthorizedRoles('provider'), invoiceController.createInvoice);
+router.get('/invoices', isauthenticate, isAuthorizedRoles('manager', 'admin', 'super_admin', 'provider'), invoiceController.getAllInvoices);
+router.get('/invoice/:id', isauthenticate, isAuthorizedRoles('manager', 'admin', 'super_admin', 'provider'), invoiceController.getInvoice);
+router.put('/invoice/:id/submit', isauthenticate, isAuthorizedRoles('provider'), invoiceController.submitInvoice);
+router.put('/invoice/:id/approve', isauthenticate, isAuthorizedRoles('manager', 'admin', 'super_admin'), invoiceController.approveInvoice);
+router.put('/invoice/:id/reject', isauthenticate, isAuthorizedRoles('manager', 'admin', 'super_admin'), invoiceController.rejectInvoice);
+router.put('/invoice/:id/mark-paid', isauthenticate, isAuthorizedRoles('admin', 'super_admin'), invoiceController.markAsPaid);
+
+module.exports = router;

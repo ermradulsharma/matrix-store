@@ -1,7 +1,7 @@
 const Product = require("../models/Product");
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncError = require("../middlewares/catchAsyncErrors");
-const features = require("../utils/features");
+const Features = require("../utils/features");
 const User = require("../models/User"); // It should be 'User' instead of 'user'
 
 exports.createProduct = catchAsyncError(async (req, res, next) => {
@@ -15,7 +15,7 @@ exports.createProduct = catchAsyncError(async (req, res, next) => {
 
 exports.getAllProducts = catchAsyncError(async (req, res) => {
     const resultPerPage = 5;
-    const apiFeatures = new features(Product.find(), req.query).search().filter().pagination(resultPerPage)
+    const apiFeatures = new Features(Product.find(), req.query).search().filter().pagination(resultPerPage)
     const products = await apiFeatures.query;
     res.status(200).json({
         success: true,

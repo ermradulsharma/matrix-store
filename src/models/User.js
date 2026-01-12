@@ -13,19 +13,13 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, "Please Enter First Name"],
         maxLength: [30, "First Name can't exceed 30 characters."],
-        minLength: [4, "First Name should be at least 4 characters."]
+        minLength: [2, "First Name should be at least 2 characters."]
     },
     last_name: {
         type: String,
         required: [true, "Please Enter Last Name"],
         maxLength: [30, "Last Name can't exceed 30 characters."],
-        minLength: [4, "Last Name should be at least 4 characters."]
-    },
-    name: {
-        type: String,
-        required: [true, "Please Enter Name"],
-        maxLength: [30, "Name can't exceed 30 characters."],
-        minLength: [4, "Name should be at least 4 characters."]
+        minLength: [2, "Last Name should be at least 2 characters."]
     },
     username: {
         type: String,
@@ -43,12 +37,19 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, "Please Enter Password"],
-        minLength: [8, "Password should be at least 8 characters."]
+        minLength: [8, "Password should be at least 8 characters."],
+        select: false
     },
     mobile_no: {
         type: String,
         required: [true, "Please Enter Mobile Number"],
         unique: true,
+        validate: {
+            validator: function (v) {
+                return /^[0-9]{10}$/.test(v);
+            },
+            message: "Please enter a valid 10-digit mobile number"
+        }
     },
     image: {
         public_id: {
@@ -64,8 +65,21 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        default: "user"
+        enum: ['super_admin', 'admin', 'manager', 'provider', 'customer'],
+        default: 'customer'
     },
+    managedBy: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        required: false
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    permissions: [{
+        type: String
+    }],
     resetPasswordToken: String,
     resetPasswordExpire: Date,
 },
@@ -100,4 +114,14 @@ userSchema.methods.getResetPasswordToken = function () {
     return resetToken;
 }
 
+// Virtual field for full name
+userSchema.virtual('name').get(function () {
+    return `${this.first_name} ${this.last_name}`;
+});
+
+// Ensure virtuals are included in JSON
+userSchema.set('toJSON', { virtuals: true });
+userSchema.set('toObject', { virtuals: true });
+
 module.exports = mongoose.model("User", userSchema);
+
