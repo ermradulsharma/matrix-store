@@ -29,9 +29,48 @@ exports.createProvider = catchAsyncError(async (req, res, next) => {
         businessRegistration,
         contactPerson,
         bankDetails,
-        productCategories,
-        manager: req.user.id
+        productCategories
     });
+
+    // Determine the Manager for this Provider
+    // Strict Hierarchy: Admin -> Manager -> Provider
+    // The Provider must be managed by a User with role 'manager'.
+
+    // We already fetched user, but let's populate managedBy to check role
+    await user.populate('managedBy');
+
+    let assignedManagerId = user.managedBy?._id;
+
+    // If user has a manager, verify legitimate role
+    if (user.managedBy) {
+        if (user.managedBy.role !== 'manager') {
+            // If the user is managed by an Admin, this violates strict hierarchy for Provider profiles
+            // UNLESS the Admin is acting as a pseudo-manager, but User requested strictness.
+            // We will check: if the logged in user is a Manager, they can claim it?
+            // But usually User.managedBy is the source of truth.
+        }
+    } else {
+        // If user has NO manager
+        if (req.user.role === 'manager') {
+            assignedManagerId = req.user.id;
+        }
+    }
+
+    if (!assignedManagerId) {
+        return next(new ErrorHandler("This user is not linked to a Manager. Please update the User account to be managed by a Manager first.", 400));
+    }
+
+    // Safety check on the ID (if we used the populated object above, we have the ID)
+    // If we derived it from req.user.id, we know it exists.
+
+    // One final check: if the assigned manager is NOT a manager role (e.g. it is Admin)
+    const managerUser = await User.findById(assignedManagerId);
+    if (managerUser.role !== 'manager') {
+        return next(new ErrorHandler("The assigned superior must have the 'manager' role. Providers cannot be managed directly by Admins.", 403));
+    }
+
+    provider.manager = assignedManagerId;
+    await provider.save();
 
     res.status(201).json({
         success: true,
@@ -43,8 +82,15 @@ exports.createProvider = catchAsyncError(async (req, res, next) => {
 exports.getAllProviders = catchAsyncError(async (req, res, next) => {
     let query = {};
 
-    // Managers and Admins can only see their assigned providers (created by/managed by them)
-    if (req.user.role === 'manager' || req.user.role === 'admin') {
+    // Managers and Admins filtering
+    if (req.user.role === 'admin') {
+        // Admin sees providers managed by themselves OR by their direct managers
+        const myManagers = await User.find({ managedBy: req.user.id });
+        const allowedManagerIds = myManagers.map(u => u._id);
+        allowedManagerIds.push(req.user.id);
+
+        query.manager = { $in: allowedManagerIds };
+    } else if (req.user.role === 'manager') {
         query.manager = req.user.id;
     }
 

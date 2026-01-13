@@ -388,10 +388,18 @@ exports.getAllUsers = catchAsyncError(async (req, res, next) => {
     }
   } else if (role === "admin") {
     // Admin sees Users they directly manage (Managers, Providers, Customers)
+    // Admin sees Users they directly manage AND users managed by their Managers
     const allowedRoles = ["manager", "provider", "customer"];
+
+    // Find all managers directly managed by this admin
+    const myManagers = await User.find({ managedBy: req.user.id, role: 'manager' });
+    const managerIds = myManagers.map(m => m._id);
+    // Include the admin's own ID
+    managerIds.push(req.user.id);
+
     filter = {
       role: queryRole && allowedRoles.includes(queryRole) ? queryRole : { $in: allowedRoles },
-      managedBy: req.user.id
+      managedBy: { $in: managerIds }
     };
   } else if (role === "manager") {
     // Manager sees Users they directly manage (Providers, Customers)
@@ -404,7 +412,7 @@ exports.getAllUsers = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Not authorized to view users", 403));
   }
 
-  const users = await User.find(filter);
+  const users = await User.find(filter).populate('managedBy', 'name first_name last_name email');
 
   res.status(200).json({
     success: true,

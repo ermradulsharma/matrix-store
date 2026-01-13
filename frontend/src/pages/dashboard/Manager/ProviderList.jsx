@@ -78,6 +78,7 @@ const ProviderList = () => {
                                 <th>Email</th>
                                 <th>Status</th>
                                 <th>Rating</th>
+                                <th>Managed By</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -94,6 +95,7 @@ const ProviderList = () => {
                                             </Badge>
                                         </td>
                                         <td>{provider.rating} / 5</td>
+                                        <td>{provider.manager?.first_name || 'N/A'}</td>
                                         <td>
                                             <div className="btn-group">
                                                 <Link to={`profile/edit/${provider._id}`} className="btn btn-sm btn-primary me-1" title="Edit Profile">
