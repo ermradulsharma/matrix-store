@@ -10,20 +10,25 @@ const Reports = () => {
     const [period, setPeriod] = useState('monthly');
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [availableYears, setAvailableYears] = useState([]);
 
     const loadData = React.useCallback(async () => {
         setLoading(true);
         try {
-            const res = await fetchAdvancedStats(period);
+            const res = await fetchAdvancedStats(period, selectedYear);
             if (res.data.success) {
                 setData(res.data);
+                if (res.data.availableYears) {
+                    setAvailableYears(res.data.availableYears);
+                }
             }
         } catch (error) {
             console.error("Error loading reports:", error);
         } finally {
             setLoading(false);
         }
-    }, [period]);
+    }, [period, selectedYear]);
 
     useEffect(() => {
         loadData();
@@ -72,6 +77,20 @@ const Reports = () => {
                     <p className="text-muted mb-0">Deep dive into your store's performance metrics.</p>
                 </div>
                 <div className="d-flex gap-2 p-1 bg-white rounded shadow-sm border">
+                    <Form.Select
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(Number(e.target.value))}
+                        className="border-0 shadow-none bg-light fw-bold text-dark border-end"
+                        style={{ width: '100px' }}
+                    >
+                        {availableYears.length > 0 ? (
+                            availableYears.map(year => (
+                                <option key={year} value={year}>{year}</option>
+                            ))
+                        ) : (
+                            <option value={new Date().getFullYear()}>{new Date().getFullYear()}</option>
+                        )}
+                    </Form.Select>
                     <Form.Select
                         value={period}
                         onChange={(e) => setPeriod(e.target.value)}

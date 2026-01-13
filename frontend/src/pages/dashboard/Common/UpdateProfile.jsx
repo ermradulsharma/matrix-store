@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Alert, Spinner, Container, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile, updateUserProfile } from '../../../services/api';
-import { useAuth } from '../../../context/AuthContext';
 import { FaArrowLeft, FaSave, FaTimes } from 'react-icons/fa';
 
 const UpdateProfile = () => {
@@ -15,7 +14,6 @@ const UpdateProfile = () => {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
     const navigate = useNavigate();
-    const { user } = useAuth();
 
     useEffect(() => {
         loadData();

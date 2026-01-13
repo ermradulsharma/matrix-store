@@ -42,26 +42,26 @@ Matrix Store is a modern, full-stack e-commerce platform built with the MERN sta
 
 ## Installation
 
-1.  **Clone the repository**
+1. **Clone the repository**
 
-    ```bash
-    git clone https://github.com/ermradulsharma/matrix-store.git
-    cd matrix-store
-    ```
+   ```bash
+   git clone https://github.com/ermradulsharma/matrix-store.git
+   cd matrix-store
+   ```
 
-2.  **Install Backend Dependencies**
+2. **Install Backend Dependencies**
 
-    ```bash
-    cd backend
-    npm install
-    ```
+   ```bash
+   cd backend
+   npm install
+   ```
 
-3.  **Install Frontend Dependencies**
+3. **Install Frontend Dependencies**
 
-    ```bash
-    cd ../frontend
-    npm install
-    ```
+   ```bash
+   cd ../frontend
+   npm install
+   ```
 
 ## Configuration
 

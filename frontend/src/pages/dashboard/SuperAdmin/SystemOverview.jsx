@@ -14,16 +14,21 @@ import autoTable from 'jspdf-autotable';
 const SystemOverview = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [availableYears, setAvailableYears] = useState([]);
 
     useEffect(() => {
-        loadStats();
-    }, []);
+        loadStats(selectedYear);
+    }, [selectedYear]);
 
-    const loadStats = async () => {
+    const loadStats = async (year) => {
         try {
-            const res = await fetchDashboardStats();
+            const res = await fetchDashboardStats(year);
             if (res.data.success) {
                 setStats(res.data.stats);
+                if (res.data.stats.availableYears) {
+                    setAvailableYears(res.data.stats.availableYears);
+                }
             }
         } catch (error) {
             console.error('Error loading dashboard stats:', error);
@@ -56,6 +61,16 @@ const SystemOverview = () => {
                 startY: doc.lastAutoTable.finalY + 15,
                 head: [['Country', 'Sales', 'Orders']],
                 body: stats.geoStats.country.slice(0, 5).map(i => [i.name, `$${i.value}`, i.count])
+            });
+        }
+
+        // Revenue Trend (Matches the Chart logic)
+        if (stats?.revenueData?.length > 0) {
+            doc.text(`Revenue Trend (${selectedYear})`, 14, doc.lastAutoTable.finalY + 10);
+            autoTable(doc, {
+                startY: doc.lastAutoTable.finalY + 15,
+                head: [['Time Period', 'Revenue']],
+                body: stats.revenueData.map(item => [item.name, `$${item.total}`])
             });
         }
 
@@ -129,12 +144,25 @@ const SystemOverview = () => {
             <Row className="g-4 mb-4">
                 <Col lg={8}>
                     <Card className="border-0 shadow-sm h-100">
-                        <Card.Header className="bg-white py-3 border-bottom-0">
+                        <Card.Header className="bg-white py-3 border-bottom-0 d-flex justify-content-between align-items-center">
                             <h5 className="fw-bold mb-0 text-dark"><FaChartLine className="me-2 text-primary" /> Revenue Trend</h5>
+                            <select
+                                className="form-select w-auto shadow-sm border-0 bg-light fw-bold text-secondary"
+                                value={selectedYear}
+                                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                            >
+                                {availableYears.length > 0 ? (
+                                    availableYears.map(year => (
+                                        <option key={year} value={year}>{year}</option>
+                                    ))
+                                ) : (
+                                    <option value={new Date().getFullYear()}>{new Date().getFullYear()}</option>
+                                )}
+                            </select>
                         </Card.Header>
                         <Card.Body>
-                            <div style={{ width: '100%', height: 350 }}>
-                                <ResponsiveContainer>
+                            <div style={{ width: '100%', height: 350, minWidth: 0, position: 'relative' }}>
+                                <ResponsiveContainer width="100%" height="100%">
                                     <LineChart data={stats?.revenueData || []}>
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e3e6f0" />
                                         <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#858796', fontSize: 12 }} dy={10} />
@@ -153,8 +181,8 @@ const SystemOverview = () => {
                             <h5 className="fw-bold mb-0 text-dark"><FaChartPie className="me-2 text-info" /> Order Status</h5>
                         </Card.Header>
                         <Card.Body className="d-flex align-items-center justify-content-center">
-                            <div style={{ width: '100%', height: 300 }}>
-                                <ResponsiveContainer>
+                            <div style={{ width: '100%', height: 300, minWidth: 0, position: 'relative' }}>
+                                <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
                                         <Pie data={stats?.pieData || []} cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={5} dataKey="value">
                                             {(stats?.pieData || []).map((entry, index) => (

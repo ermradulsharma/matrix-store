@@ -44,9 +44,7 @@
 
 .sidebar .nav-item a {
     color: #ffffff;
-    border-radius: 8px;
-    margin: 4px 10px;
-    transition: all 0.3s ease;
+    /* transition: all 0.3s ease; */
 }
 
 /* Active Link Gradient (Teal) */
@@ -60,12 +58,14 @@
 .sidebar .nav-item a:hover:not(.active) {
     background: linear-gradient(45deg, rgb(28, 200, 138), rgb(19, 133, 92));
     color: white;
-    transform: translateX(5px);
+    /* transform: translateX(5px); */
 }
 
 /* Header Theme */
-.dashboard-header-theme {
-    background: linear-gradient(45deg, rgb(78, 115, 223), rgb(34, 74, 190));
+.dashboard-header-glass {
+    background: linear-gradient(45deg, rgb(78, 115, 223), rgb(34, 74, 190)) !important;
+    backdrop-filter: blur(10px);
+    z-index: 1000;
 }
 
 /* Button Themes */
@@ -113,4 +113,9 @@
 .btn-warning:hover {
     filter: brightness(110%);
     box-shadow: 0 4px 10px rgba(246, 194, 62, 0.4);
+}
+
+/* Remove Dropdown Caret */
+.no-caret::after {
+    display: none !important;
 }

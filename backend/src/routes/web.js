@@ -301,29 +301,15 @@ router.delete(
   orderController.deleteOrder
 );
 
-// Order Routes
-router.post("/order/new", isauthenticate, orderController.newOrder);
-router.get("/order/:id", isauthenticate, orderController.getSingleOrder);
-router.get("/orders/me", isauthenticate, orderController.myOrders);
+// Notification Routes
+const notificationController = require("../controllers/notificationController");
 
-// Admin Order Routes
-router.get(
-  "/admin/orders",
-  isauthenticate,
-  isAuthorizedRoles("admin", "super_admin"),
-  orderController.getAllOrders
-);
-router.put(
-  "/admin/order/:id",
-  isauthenticate,
-  isAuthorizedRoles("admin", "super_admin"),
-  orderController.updateOrder
-);
-router.delete(
-  "/admin/order/:id",
-  isauthenticate,
-  isAuthorizedRoles("admin", "super_admin"),
-  orderController.deleteOrder
-);
+router.get("/notifications", isauthenticate, notificationController.getNotifications);
+router.put("/notifications/read-all", isauthenticate, notificationController.markAllAsRead);
+router.put("/notifications/:id/read", isauthenticate, notificationController.markAsRead);
+
+// Search Routes
+const searchController = require("../controllers/searchController");
+router.get("/admin/global-search", isauthenticate, isAuthorizedRoles("admin", "super_admin"), searchController.globalSearch);
 
 module.exports = router;

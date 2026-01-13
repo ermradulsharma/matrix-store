@@ -12,7 +12,7 @@ import {
     FaChartLine
 } from 'react-icons/fa';
 
-const Sidebar = () => {
+const Sidebar = ({ collapsed }) => {
     const { user } = useAuth();
     const location = useLocation();
 
@@ -156,13 +156,32 @@ const Sidebar = () => {
     };
 
     return (
-        <div className="d-flex flex-column flex-shrink-0 vh-100 sticky-top sidebar" style={{ width: '280px' }}>
-            <Link to="/" className="d-flex align-items-center justify-content-center link-dark text-decoration-none border-bottom" style={{ minHeight: '73px' }}>
-                <FaHome className="me-2" size={24} />
-                <span className="fs-4 fw-bold">Matrix Store</span>
+        <div
+            className="d-flex flex-column flex-shrink-0 vh-100 sticky-top sidebar bg-white border-end transition-all"
+            style={{ width: collapsed ? '80px' : '280px', transition: 'width 0.3s ease' }}
+        >
+            <Link to="/" className="d-flex align-items-center justify-content-center text-white link-dark text-decoration-none border-bottom" style={{ minHeight: '77px' }}>
+                <FaHome className={`${collapsed ? '' : 'me-2'}`} size={24} />
+                {!collapsed && <span className="fs-4 fw-bold">Matrix Store</span>}
             </Link>
-            <Nav className="flex-column flex-grow-1 overflow-auto p-0">
-                {renderNavItems()}
+            <Nav className="flex-column flex-grow-1 overflow-auto p-0 scrollbar-none">
+                {React.Children.map(renderNavItems().props.children, (child) => {
+                    // Cloning the child (Nav.Item) to modify its children (Link)
+                    if (React.isValidElement(child)) {
+                        return React.cloneElement(child, {},
+                            React.cloneElement(child.props.children, {
+                                className: `nav-link ${isActive(child.props.children.props.to) ? 'active' : ''} ${collapsed ? 'd-flex justify-content-center px-0' : 'px-3'} py-3`,
+                                title: collapsed ? child.props.children.props.children[1] : '' // Add tooltip/title for collapsed state
+                            },
+                                <>
+                                    {React.cloneElement(child.props.children.props.children[0], { className: collapsed ? '' : 'me-2', size: 20 })}
+                                    {!collapsed && child.props.children.props.children[1]}
+                                </>
+                            )
+                        );
+                    }
+                    return child;
+                })}
             </Nav>
         </div>
     );

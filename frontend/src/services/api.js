@@ -328,12 +328,15 @@ export const deleteProduct = async (id) => {
 // ============= ORDERS =============
 
 // ============= DASHBOARD =============
-export const fetchDashboardStats = async () => {
-  return await api.get("/admin/stats");
+export const fetchDashboardStats = async (year) => {
+  const params = year ? { year } : {};
+  return await api.get("/admin/stats", { params });
 };
 
-export const fetchAdvancedStats = async (period = "monthly") => {
-  return await api.get("/admin/analytics", { params: { period } });
+export const fetchAdvancedStats = async (period = "monthly", year) => {
+  const params = { period };
+  if (year) params.year = year;
+  return await api.get("/admin/analytics", { params });
 };
 
 /** Submit a new order */
@@ -441,5 +444,12 @@ export const fetchUsers = () => api.get("/admin/users");
 export const deleteUserProfile = (id) => api.delete(`/admin/user/${id}`);
 export const createUser = (userData) => api.post("/admin/user/new", userData);
 export const updateUserAdmin = (id, userData) => api.put(`/admin/user/${id}`, userData);
+
+// Notifications
+export const fetchNotifications = () => api.get("/notifications");
+export const markNotificationRead = (id) => api.put(`/notifications/${id}/read`);
+export const markAllNotificationsRead = () => api.put("/notifications/read-all");
+
+export const searchGlobal = (query) => api.get(`/admin/global-search?q=${query}`);
 
 export default api;
