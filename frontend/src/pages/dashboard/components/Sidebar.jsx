@@ -9,13 +9,11 @@ import {
     FaFileInvoiceDollar,
     FaClipboardList,
     FaBuilding,
-    FaChartLine,
-    FaSignOutAlt,
-    FaUser
+    FaChartLine
 } from 'react-icons/fa';
 
 const Sidebar = () => {
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
     const location = useLocation();
 
     const isActive = (path) => location.pathname === path;
@@ -26,37 +24,42 @@ const Sidebar = () => {
                 return (
                     <>
                         <Nav.Item>
-                            <Link to="/dashboard/super-admin" className={`nav-link ${isActive('/dashboard/super-admin') ? 'active' : ''}`}>
+                            <Link to="/dashboard" className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}>
                                 <FaChartLine className="me-2" /> System Overview
                             </Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Link to="/dashboard/super-admin/reports" className={`nav-link ${isActive('/dashboard/super-admin/reports') ? 'active' : ''}`}>
+                            <Link to="/reports" className={`nav-link ${isActive('/reports') ? 'active' : ''}`}>
                                 <FaFileInvoiceDollar className="me-2" /> Analytics & Reports
                             </Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Link to="/dashboard/super-admin/products" className={`nav-link ${isActive('/dashboard/super-admin/products') ? 'active' : ''}`}>
+                            <Link to="/products" className={`nav-link ${isActive('/products') ? 'active' : ''}`}>
                                 <FaBoxOpen className="me-2" /> Products
                             </Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Link to="/dashboard/admin-list" className={`nav-link ${isActive('/dashboard/admin-list') ? 'active' : ''}`}>
+                            <Link to="/categories" className={`nav-link ${isActive('/categories') ? 'active' : ''}`}>
+                                <FaClipboardList className="me-2" /> Categories
+                            </Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Link to="/admins" className={`nav-link ${isActive('/admins') ? 'active' : ''}`}>
                                 <FaUsers className="me-2" /> Admins
                             </Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Link to="/dashboard/manager-list" className={`nav-link ${isActive('/dashboard/manager-list') ? 'active' : ''}`}>
+                            <Link to="/managers" className={`nav-link ${isActive('/managers') ? 'active' : ''}`}>
                                 <FaUsers className="me-2" /> Managers
                             </Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Link to="/dashboard/provider-list" className={`nav-link ${isActive('/dashboard/provider-list') ? 'active' : ''}`}>
+                            <Link to="/providers" className={`nav-link ${isActive('/providers') ? 'active' : ''}`}>
                                 <FaUsers className="me-2" /> Providers
                             </Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Link to="/dashboard/customer-list" className={`nav-link ${isActive('/dashboard/customer-list') ? 'active' : ''}`}>
+                            <Link to="/customers" className={`nav-link ${isActive('/customers') ? 'active' : ''}`}>
                                 <FaUsers className="me-2" /> Customers
                             </Link>
                         </Nav.Item>
@@ -66,18 +69,23 @@ const Sidebar = () => {
                 return (
                     <>
                         <Nav.Item>
-                            <Link to="/dashboard/admin" className={`nav-link ${isActive('/dashboard/admin') ? 'active' : ''}`}>
+                            <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>
                                 <FaChartLine className="me-2" /> Overview
                             </Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Link to="/dashboard/admin/managers" className={`nav-link ${isActive('/dashboard/admin/managers') ? 'active' : ''}`}>
-                                <FaUsers className="me-2" /> Manage Managers
+                            <Link to="/admin/products" className={`nav-link ${isActive('/admin/products') ? 'active' : ''}`}>
+                                <FaBoxOpen className="me-2" /> Products
                             </Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Link to="/dashboard/admin/products" className={`nav-link ${isActive('/dashboard/admin/products') ? 'active' : ''}`}>
-                                <FaBoxOpen className="me-2" /> Product Approvals
+                            <Link to="/admin/managers" className={`nav-link ${isActive('/admin/managers') ? 'active' : ''}`}>
+                                <FaUsers className="me-2" /> Managers
+                            </Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Link to="/admin/providers" className={`nav-link ${isActive('/admin/providers') ? 'active' : ''}`}>
+                                <FaUsers className="me-2" /> Providers
                             </Link>
                         </Nav.Item>
                     </>
@@ -86,27 +94,32 @@ const Sidebar = () => {
                 return (
                     <>
                         <Nav.Item>
-                            <Link to="/dashboard/manager" className={`nav-link ${isActive('/dashboard/manager') ? 'active' : ''}`}>
+                            <Link to="/manager" className={`nav-link ${isActive('/manager') ? 'active' : ''}`}>
                                 <FaChartLine className="me-2" /> Overview
                             </Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Link to="/dashboard/manager/providers" className={`nav-link ${isActive('/dashboard/manager/providers') ? 'active' : ''}`}>
+                            <Link to="/manager/products" className={`nav-link ${isActive('/manager/products') ? 'active' : ''}`}>
+                                <FaBoxOpen className="me-2" /> Products
+                            </Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Link to="/manager/providers" className={`nav-link ${isActive('/manager/providers') ? 'active' : ''}`}>
                                 <FaBuilding className="me-2" /> Providers
                             </Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Link to="/dashboard/manager/customers" className={`nav-link ${isActive('/dashboard/manager/customers') ? 'active' : ''}`}>
+                            <Link to="/manager/customers" className={`nav-link ${isActive('/manager/customers') ? 'active' : ''}`}>
                                 <FaUsers className="me-2" /> Customers
                             </Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Link to="/dashboard/manager/requirements" className={`nav-link ${isActive('/dashboard/manager/requirements') ? 'active' : ''}`}>
+                            <Link to="/manager/requirements" className={`nav-link ${isActive('/manager/requirements') ? 'active' : ''}`}>
                                 <FaClipboardList className="me-2" /> Requirements
                             </Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Link to="/dashboard/manager/invoices" className={`nav-link ${isActive('/dashboard/manager/invoices') ? 'active' : ''}`}>
+                            <Link to="/manager/invoices" className={`nav-link ${isActive('/manager/invoices') ? 'active' : ''}`}>
                                 <FaFileInvoiceDollar className="me-2" /> Invoices
                             </Link>
                         </Nav.Item>
@@ -116,17 +129,22 @@ const Sidebar = () => {
                 return (
                     <>
                         <Nav.Item>
-                            <Link to="/dashboard/provider" className={`nav-link ${isActive('/dashboard/provider') ? 'active' : ''}`}>
+                            <Link to="/provider" className={`nav-link ${isActive('/provider') ? 'active' : ''}`}>
                                 <FaChartLine className="me-2" /> Overview
                             </Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Link to="/dashboard/provider/requirements" className={`nav-link ${isActive('/dashboard/provider/requirements') ? 'active' : ''}`}>
+                            <Link to="/provider/products" className={`nav-link ${isActive('/provider/products') ? 'active' : ''}`}>
+                                <FaBoxOpen className="me-2" /> Products
+                            </Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Link to="/provider/requirements" className={`nav-link ${isActive('/provider/requirements') ? 'active' : ''}`}>
                                 <FaClipboardList className="me-2" /> My Requirements
                             </Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Link to="/dashboard/provider/invoices" className={`nav-link ${isActive('/dashboard/provider/invoices') ? 'active' : ''}`}>
+                            <Link to="/provider/invoices" className={`nav-link ${isActive('/provider/invoices') ? 'active' : ''}`}>
                                 <FaFileInvoiceDollar className="me-2" /> My Invoices
                             </Link>
                         </Nav.Item>
@@ -138,41 +156,13 @@ const Sidebar = () => {
     };
 
     return (
-        <div className="d-flex flex-column flex-shrink-0 p-3 bg-light" style={{ width: '280px', minHeight: '100vh' }}>
-            <Link to="/" className="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+        <div className="d-flex flex-column flex-shrink-0 vh-100 sticky-top sidebar" style={{ width: '280px' }}>
+            <Link to="/" className="d-flex align-items-center justify-content-center link-dark text-decoration-none border-bottom" style={{ minHeight: '73px' }}>
                 <FaHome className="me-2" size={24} />
-                <span className="fs-4">Matrix Store</span>
+                <span className="fs-4 fw-bold">Matrix Store</span>
             </Link>
-            <hr />
-            <div className="mb-3">
-                <div className="d-flex align-items-center">
-                    <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style={{ width: '40px', height: '40px' }}>
-                        {user?.first_name?.charAt(0)}
-                    </div>
-                    <div>
-                        <strong>{user?.first_name} {user?.last_name}</strong>
-                        <div className="text-muted small text-capitalize">{user?.role?.replace('_', ' ')}</div>
-                    </div>
-                </div>
-            </div>
-            <hr />
-            <Nav className="flex-column mb-auto">
+            <Nav className="flex-column flex-grow-1 overflow-auto p-0">
                 {renderNavItems()}
-            </Nav>
-
-            <hr className="my-2" />
-
-            <Nav className="flex-column mb-4">
-                <Nav.Item>
-                    <Link to="/dashboard/profile" className={`nav-link ${isActive('/dashboard/profile') ? 'active' : ''}`}>
-                        <FaUser className="me-2" /> My Profile
-                    </Link>
-                </Nav.Item>
-                <Nav.Item>
-                    <button className="nav-link btn btn-link text-start text-danger" onClick={logout}>
-                        <FaSignOutAlt className="me-2" /> Logout
-                    </button>
-                </Nav.Item>
             </Nav>
         </div>
     );

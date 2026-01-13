@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Badge, Spinner, Button, Table } from 'react-bootstrap';
+import { Card, Row, Col, Badge, Spinner, Button, Table, Container, Tab, Nav } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaUsers, FaShoppingCart, FaStore, FaMoneyBillWave, FaUserShield, FaUserTie, FaUser, FaBoxOpen, FaDownload } from 'react-icons/fa';
+import {
+    FaUsers, FaShoppingCart, FaStore, FaMoneyBillWave,
+    FaUserShield, FaUserTie, FaUser, FaBoxOpen, FaDownload,
+    FaChartLine, FaChartPie, FaGlobeAmericas, FaMapMarkerAlt, FaCity, FaFlag
+} from 'react-icons/fa';
 import { fetchDashboardStats } from '../../../services/api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import SalesMap from '../components/SalesMap';
 
 const SystemOverview = () => {
     const [stats, setStats] = useState(null);
@@ -34,7 +39,6 @@ const SystemOverview = () => {
         doc.setFontSize(10);
         doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 25);
 
-        // Summary Table
         autoTable(doc, {
             startY: 30,
             head: [['Metric', 'Value']],
@@ -46,7 +50,16 @@ const SystemOverview = () => {
             ],
         });
 
-        // Recent Orders Table
+        // Geo Stats
+        if (stats?.geoStats) {
+            doc.text("Top Countries", 14, doc.lastAutoTable.finalY + 10);
+            autoTable(doc, {
+                startY: doc.lastAutoTable.finalY + 15,
+                head: [['Country', 'Sales', 'Orders']],
+                body: stats.geoStats.country.slice(0, 5).map(i => [i.name, `$${i.value}`, i.count])
+            });
+        }
+
         if (stats?.recentOrders?.length > 0) {
             doc.text("Recent 5 Orders", 14, doc.lastAutoTable.finalY + 15);
             autoTable(doc, {
@@ -62,41 +75,85 @@ const SystemOverview = () => {
             });
         }
 
-        doc.save('max-store-report.pdf');
+        doc.save('matrix-store-report.pdf');
     };
 
-    if (loading) return <div className="text-center p-5"><Spinner animation="border" /></div>;
+    if (loading) return (
+        <div className="d-flex justify-content-center align-items-center" style={{ height: '80vh' }}>
+            <Spinner animation="grow" variant="primary" />
+        </div>
+    );
 
-    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+    const COLORS = ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'];
 
-    const statCards = [
-        { title: 'Total Revenue', value: stats?.orders?.totalAmount ? `$${stats.orders.totalAmount.toLocaleString()}` : '$0', icon: FaMoneyBillWave, color: 'success' },
-        { title: 'Total Orders', value: stats?.orders?.total || 0, icon: FaShoppingCart, color: 'primary' },
-        { title: 'Total Products', value: stats?.products || 0, icon: FaBoxOpen, color: 'warning' },
-        { title: 'Total Users', value: stats?.users?.total || 0, icon: FaUsers, color: 'info' },
+    const cardStyles = [
+        { bg: 'linear-gradient(45deg, #4e73df, #224abe)', text: 'white', icon: FaMoneyBillWave, title: 'Total Revenue', value: stats?.orders?.totalAmount ? `$${stats.orders.totalAmount.toLocaleString()}` : '$0' },
+        { bg: 'linear-gradient(45deg, #1cc88a, #13855c)', text: 'white', icon: FaShoppingCart, title: 'Total Orders', value: stats?.orders?.total || 0 },
+        { bg: 'linear-gradient(45deg, #36b9cc, #258391)', text: 'white', icon: FaBoxOpen, title: 'Total Products', value: stats?.products || 0 },
+        { bg: 'linear-gradient(45deg, #f6c23e, #dda20a)', text: 'white', icon: FaUsers, title: 'Total Users', value: stats?.users?.total || 0 },
     ];
 
+    const GeoTable = ({ data, icon: Icon, title, color }) => (
+        <Card className="border-0 shadow-sm h-100">
+            <Card.Header className="bg-white py-3 border-bottom-0 d-flex align-items-center">
+                <Icon className={`me-2 text-${color}`} />
+                <h6 className="fw-bold mb-0">{title}</h6>
+            </Card.Header>
+            <Card.Body className="p-0">
+                <div className="table-responsive" style={{ maxHeight: '300px' }}>
+                    <Table hover className="mb-0 align-middle">
+                        <thead className="bg-light text-muted small">
+                            <tr>
+                                <th className="border-0 ps-4">Name</th>
+                                <th className="border-0 text-end">Sales</th>
+                                <th className="border-0 text-end pe-4">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data && data.length > 0 ? (
+                                data.map((item, idx) => (
+                                    <tr key={idx}>
+                                        <td className="ps-4 fw-medium">{item.name || 'Unknown'}</td>
+                                        <td className="text-end text-success fw-bold">${item.value.toLocaleString()}</td>
+                                        <td className="text-end pe-4">{item.count}</td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr><td colSpan="3" className="text-center text-muted small py-3">No Data</td></tr>
+                            )}
+                        </tbody>
+                    </Table>
+                </div>
+            </Card.Body>
+        </Card>
+    );
+
     return (
-        <div className="container-fluid p-4">
+        <Container fluid className="p-4 bg-light min-vh-100">
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="mb-0">System Overview</h2>
-                <Button variant="outline-primary" onClick={downloadReport}>
-                    <FaDownload className="me-2" /> Download Report
+                <div>
+                    <h2 className="fw-bold text-dark mb-1">System Overview</h2>
+                    <p className="text-muted mb-0">Welcome back, here's what's happening via Matrix Store.</p>
+                </div>
+                <Button variant="primary" className="shadow-sm d-flex align-items-center gap-2" onClick={downloadReport}>
+                    <FaDownload /> Download Report
                 </Button>
             </div>
 
             {/* Key Metrics */}
-            <Row className="mb-4">
-                {statCards.map((stat, index) => (
-                    <Col md={3} className="mb-4" key={index}>
-                        <Card className={`border-start border-4 border-${stat.color} shadow-sm h-100`}>
-                            <Card.Body className="d-flex align-items-center">
-                                <div className={`bg-${stat.color} bg-opacity-10 p-3 rounded me-3`}>
-                                    <stat.icon className={`text-${stat.color}`} size={24} />
-                                </div>
-                                <div>
-                                    <h6 className="text-muted mb-1">{stat.title}</h6>
-                                    <h3 className="mb-0">{stat.value}</h3>
+            <Row className="g-4 mb-4">
+                {cardStyles.map((card, index) => (
+                    <Col md={6} xl={3} key={index}>
+                        <Card className="border-0 shadow-sm h-100 overflow-hidden transform-hover">
+                            <Card.Body className="p-4" style={{ background: card.bg, color: card.text }}>
+                                <div className="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <p className="mb-1 opacity-75 fw-medium text-uppercase" style={{ fontSize: '0.85rem' }}>{card.title}</p>
+                                        <h3 className="fw-bold mb-0">{card.value}</h3>
+                                    </div>
+                                    <div className="p-3 rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center">
+                                        <card.icon size={24} color="white" />
+                                    </div>
                                 </div>
                             </Card.Body>
                         </Card>
@@ -104,55 +161,44 @@ const SystemOverview = () => {
                 ))}
             </Row>
 
-            {/* Analytics Section */}
-            <Row className="mb-4">
-                <Col md={8}>
-                    <Card className="shadow-sm h-100">
-                        <Card.Header className="bg-white py-3">
-                            <h5 className="mb-0">Revenue Trend (Last 6 Months)</h5>
+            {/* Charts Section */}
+            <Row className="g-4 mb-4">
+                <Col lg={8}>
+                    <Card className="border-0 shadow-sm h-100">
+                        <Card.Header className="bg-white py-3 border-bottom-0">
+                            <h5 className="fw-bold mb-0 text-dark"><FaChartLine className="me-2 text-primary" /> Revenue Trend</h5>
                         </Card.Header>
                         <Card.Body>
-                            <div style={{ width: '100%', height: 300 }}>
+                            <div style={{ width: '100%', height: 350 }}>
                                 <ResponsiveContainer>
                                     <LineChart data={stats?.revenueData || []}>
-                                        <CartesianGrid strokeDasharray="3 3" />
-                                        <XAxis dataKey="name" />
-                                        <YAxis />
-                                        <Tooltip />
-                                        <Legend />
-                                        <Line type="monotone" dataKey="total" stroke="#8884d8" name="Revenue ($)" activeDot={{ r: 8 }} />
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e3e6f0" />
+                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#858796', fontSize: 12 }} dy={10} />
+                                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#858796', fontSize: 12 }} tickFormatter={(val) => `$${val}`} />
+                                        <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} formatter={(value) => [`$${value}`, 'Revenue']} />
+                                        <Line type="monotone" dataKey="total" stroke="#4e73df" strokeWidth={3} dot={{ r: 4, fill: '#4e73df', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
                                     </LineChart>
                                 </ResponsiveContainer>
                             </div>
                         </Card.Body>
                     </Card>
                 </Col>
-                <Col md={4}>
-                    <Card className="shadow-sm h-100">
-                        <Card.Header className="bg-white py-3">
-                            <h5 className="mb-0">Order Status</h5>
+                <Col lg={4}>
+                    <Card className="border-0 shadow-sm h-100">
+                        <Card.Header className="bg-white py-3 border-bottom-0">
+                            <h5 className="fw-bold mb-0 text-dark"><FaChartPie className="me-2 text-info" /> Order Status</h5>
                         </Card.Header>
-                        <Card.Body>
+                        <Card.Body className="d-flex align-items-center justify-content-center">
                             <div style={{ width: '100%', height: 300 }}>
                                 <ResponsiveContainer>
                                     <PieChart>
-                                        <Pie
-                                            data={stats?.pieData || []}
-                                            cx="50%"
-                                            cy="50%"
-                                            innerRadius={60}
-                                            outerRadius={80}
-                                            fill="#8884d8"
-                                            paddingAngle={5}
-                                            dataKey="value"
-                                            label
-                                        >
+                                        <Pie data={stats?.pieData || []} cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={5} dataKey="value">
                                             {(stats?.pieData || []).map((entry, index) => (
                                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                             ))}
                                         </Pie>
                                         <Tooltip />
-                                        <Legend />
+                                        <Legend verticalAlign="bottom" height={36} />
                                     </PieChart>
                                 </ResponsiveContainer>
                             </div>
@@ -161,56 +207,88 @@ const SystemOverview = () => {
                 </Col>
             </Row>
 
-            {/* Role Breakdown & Recent Activity */}
-            <Row>
-                <Col md={6} className="mb-4">
-                    <Card className="shadow-sm h-100">
-                        <Card.Header className="bg-white py-3">
-                            <h5 className="mb-0">User Distribution</h5>
+            {/* Geographic Analysis */}
+            <h5 className="fw-bold text-dark mb-3"><FaGlobeAmericas className="me-2 text-primary" /> Geographic Sales Analysis</h5>
+            <Row className="g-4 mb-4">
+                <Col lg={6}>
+                    <SalesMap data={stats?.geoStats} />
+                </Col>
+                <Col lg={6}>
+                    <Tab.Container defaultActiveKey="country">
+                        <Card className="border-0 shadow-sm h-100">
+                            <Card.Header className="bg-white border-bottom-0 pt-3 px-3">
+                                <Nav variant="pills" className="nav-pills-custom">
+                                    <Nav.Item>
+                                        <Nav.Link eventKey="country" className="px-3 py-1 fw-bold small">Country</Nav.Link>
+                                    </Nav.Item>
+                                    <Nav.Item>
+                                        <Nav.Link eventKey="state" className="ms-2 px-3 py-1 fw-bold small">State</Nav.Link>
+                                    </Nav.Item>
+                                    <Nav.Item>
+                                        <Nav.Link eventKey="city" className="ms-2 px-3 py-1 fw-bold small">City</Nav.Link>
+                                    </Nav.Item>
+                                </Nav>
+                            </Card.Header>
+                            <Card.Body className="p-0">
+                                <Tab.Content>
+                                    <Tab.Pane eventKey="country">
+                                        <GeoTable data={stats?.geoStats?.country} icon={FaFlag} title="Top Countries" color="primary" />
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey="state">
+                                        <GeoTable data={stats?.geoStats?.state} icon={FaMapMarkerAlt} title="Top States" color="danger" />
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey="city">
+                                        <GeoTable data={stats?.geoStats?.city} icon={FaCity} title="Top Cities" color="info" />
+                                    </Tab.Pane>
+                                </Tab.Content>
+                            </Card.Body>
+                        </Card>
+                    </Tab.Container>
+                </Col>
+            </Row>
+
+            {/* Bottom Section: Users & Recent Orders */}
+            <Row className="g-4">
+                <Col lg={4}>
+                    <Card className="border-0 shadow-sm h-100">
+                        <Card.Header className="bg-white py-3 border-bottom-0">
+                            <h5 className="fw-bold mb-0 text-dark">User Distribution</h5>
                         </Card.Header>
-                        <Card.Body>
-                            <Row>
-                                <Col xs={6} className="mb-3">
-                                    <Link to="/dashboard/super-admin/admins" className="text-decoration-none text-dark">
-                                        <div className="d-flex align-items-center p-3 border rounded hover-shadow transition-all" style={{ cursor: 'pointer', backgroundColor: '#f8f9fa' }}>
-                                            <FaUserShield className="text-dark me-3" size={24} />
-                                            <div>
-                                                <small className="text-muted d-block">Admins</small>
-                                                <strong className="h5 mb-0">{stats?.users?.admin || 0}</strong>
-                                            </div>
-                                        </div>
-                                    </Link>
-                                </Col>
-                                <Col xs={6} className="mb-3">
-                                    <Link to="/dashboard/manager-list" className="text-decoration-none text-dark">
-                                        <div className="d-flex align-items-center p-3 border rounded hover-shadow transition-all" style={{ cursor: 'pointer', backgroundColor: '#f8f9fa' }}>
-                                            <FaUserTie className="text-secondary me-3" size={24} />
-                                            <div>
-                                                <small className="text-muted d-block">Managers</small>
-                                                <strong className="h5 mb-0">{stats?.users?.manager || 0}</strong>
-                                            </div>
+                        <Card.Body className="p-3">
+                            <Row className="g-3">
+                                <Col xs={6}>
+                                    <Link to="/admins" className="text-decoration-none">
+                                        <div className="p-3 border rounded-3 text-center bg-white hover-card transition-all h-100">
+                                            <FaUserShield className="text-primary mb-2" size={28} />
+                                            <div className="text-muted small fw-bold">Admins</div>
+                                            <div className="fs-4 fw-bold text-dark">{stats?.users?.admin || 0}</div>
                                         </div>
                                     </Link>
                                 </Col>
                                 <Col xs={6}>
-                                    <Link to="/dashboard/provider-list" className="text-decoration-none text-dark">
-                                        <div className="d-flex align-items-center p-3 border rounded hover-shadow transition-all" style={{ cursor: 'pointer', backgroundColor: '#f8f9fa' }}>
-                                            <FaStore className="text-info me-3" size={24} />
-                                            <div>
-                                                <small className="text-muted d-block">Providers</small>
-                                                <strong className="h5 mb-0">{stats?.users?.provider || 0}</strong>
-                                            </div>
+                                    <Link to="/managers" className="text-decoration-none">
+                                        <div className="p-3 border rounded-3 text-center bg-white hover-card transition-all h-100">
+                                            <FaUserTie className="text-success mb-2" size={28} />
+                                            <div className="text-muted small fw-bold">Managers</div>
+                                            <div className="fs-4 fw-bold text-dark">{stats?.users?.manager || 0}</div>
                                         </div>
                                     </Link>
                                 </Col>
                                 <Col xs={6}>
-                                    <Link to="/dashboard/customer-list" className="text-decoration-none text-dark">
-                                        <div className="d-flex align-items-center p-3 border rounded hover-shadow transition-all" style={{ cursor: 'pointer', backgroundColor: '#f8f9fa' }}>
-                                            <FaUser className="text-primary me-3" size={24} />
-                                            <div>
-                                                <small className="text-muted d-block">Customers</small>
-                                                <strong className="h5 mb-0">{stats?.users?.customer || 0}</strong>
-                                            </div>
+                                    <Link to="/providers" className="text-decoration-none">
+                                        <div className="p-3 border rounded-3 text-center bg-white hover-card transition-all h-100">
+                                            <FaStore className="text-info mb-2" size={28} />
+                                            <div className="text-muted small fw-bold">Providers</div>
+                                            <div className="fs-4 fw-bold text-dark">{stats?.users?.provider || 0}</div>
+                                        </div>
+                                    </Link>
+                                </Col>
+                                <Col xs={6}>
+                                    <Link to="/customers" className="text-decoration-none">
+                                        <div className="p-3 border rounded-3 text-center bg-white hover-card transition-all h-100">
+                                            <FaUser className="text-warning mb-2" size={28} />
+                                            <div className="text-muted small fw-bold">Customers</div>
+                                            <div className="fs-4 fw-bold text-dark">{stats?.users?.customer || 0}</div>
                                         </div>
                                     </Link>
                                 </Col>
@@ -218,44 +296,71 @@ const SystemOverview = () => {
                         </Card.Body>
                     </Card>
                 </Col>
-                <Col md={6} className="mb-4">
-                    <Card className="shadow-sm h-100">
-                        <Card.Header className="bg-white py-3">
-                            <h5 className="mb-0">Recent Orders</h5>
+
+                <Col lg={8}>
+                    <Card className="border-0 shadow-sm h-100">
+                        <Card.Header className="bg-white py-3 border-bottom-0 d-flex justify-content-between align-items-center">
+                            <h5 className="fw-bold mb-0 text-dark">Recent Orders</h5>
+                            <Button variant="light" size="sm" className="text-primary fw-bold">View All</Button>
                         </Card.Header>
                         <Card.Body className="p-0">
-                            <Table responsive hover className="mb-0">
-                                <thead className="bg-light">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Status</th>
-                                        <th>Amount</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {stats?.recentOrders?.map(order => (
-                                        <tr key={order._id}>
-                                            <td><small>{order._id.substring(0, 8)}...</small></td>
-                                            <td>
-                                                <Badge bg={order.orderStatus === 'delivered' ? 'success' : 'warning'}>
-                                                    {order.orderStatus}
-                                                </Badge>
-                                            </td>
-                                            <td>${order.totalPrice}</td>
-                                            <td><small>{new Date(order.createdAt).toLocaleDateString()}</small></td>
+                            <div className="table-responsive">
+                                <Table hover className="align-middle mb-0 text-nowrap">
+                                    <thead className="bg-light text-muted text-uppercase small">
+                                        <tr>
+                                            <th className="border-0 ps-4">Order ID</th>
+                                            <th className="border-0">Customer</th>
+                                            <th className="border-0">Amount</th>
+                                            <th className="border-0">Status</th>
+                                            <th className="border-0">Date</th>
                                         </tr>
-                                    ))}
-                                    {(!stats?.recentOrders || stats.recentOrders.length === 0) && (
-                                        <tr><td colSpan="4" className="text-center">No recent orders</td></tr>
-                                    )}
-                                </tbody>
-                            </Table>
+                                    </thead>
+                                    <tbody>
+                                        {stats?.recentOrders?.length > 0 ? (
+                                            stats.recentOrders.map(order => (
+                                                <tr key={order._id}>
+                                                    <td className="ps-4 fw-medium text-dark">#{order._id.substring(0, 8)}</td>
+                                                    <td>
+                                                        <div className="d-flex align-items-center">
+                                                            <div className="rounded-circle bg-light d-flex align-items-center justify-content-center me-2" style={{ width: 30, height: 30 }}>
+                                                                <FaUser size={12} className="text-secondary" />
+                                                            </div>
+                                                            {order.user?.name || 'Guest'}
+                                                        </div>
+                                                    </td>
+                                                    <td className="fw-bold">${order.totalPrice}</td>
+                                                    <td>
+                                                        <Badge bg={
+                                                            order.orderStatus === 'Delivered' ? 'success' :
+                                                                order.orderStatus === 'Processing' ? 'info' :
+                                                                    order.orderStatus === 'Shipped' ? 'primary' : 'warning'
+                                                        } className="px-3 py-2 rounded-pill fw-normal">
+                                                            {order.orderStatus}
+                                                        </Badge>
+                                                    </td>
+                                                    <td className="text-muted">{new Date(order.createdAt).toLocaleDateString()}</td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr><td colSpan="5" className="text-center py-4 text-muted">No recent orders found</td></tr>
+                                        )}
+                                    </tbody>
+                                </Table>
+                            </div>
                         </Card.Body>
                     </Card>
                 </Col>
             </Row>
-        </div>
+
+            <style>
+                {`
+                .hover-card:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.1); }
+                .transition-all { transition: all 0.3s ease; }
+                .nav-pills-custom .nav-link { color: #6c757d; background: transparent; }
+                .nav-pills-custom .nav-link.active { background: #4e73df; color: white; border-radius: 50rem; }
+                `}
+            </style>
+        </Container>
     );
 };
 

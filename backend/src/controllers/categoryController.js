@@ -66,3 +66,20 @@ exports.deleteCategory = catchAsyncError(async (req, res, next) => {
         message: "Category deleted successfully",
     });
 });
+
+exports.toggleCategoryStatus = catchAsyncError(async (req, res, next) => {
+    const category = await Category.findById(req.params.id);
+    if (!category) {
+        return next(new ErrorHandler("Category Not Found", 404));
+    }
+
+    const newStatus = category.status === 'active' ? 'inactive' : 'active';
+    category.status = newStatus;
+    await category.save();
+
+    res.status(200).json({
+        success: true,
+        message: `Category ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully`,
+        status: newStatus
+    });
+});

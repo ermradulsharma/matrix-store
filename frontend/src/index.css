@@ -134,6 +134,14 @@ a:hover {
     }
 }
 
-.fade-in {
-    animation: fadeIn 0.5s ease-in-out;
+
+
+/* Theme Integration */
+.bg-theme-gradient {
+    background: linear-gradient(312deg, #4e73df, #04237e) !important;
+}
+
+.bg-theme-gradient .border-bottom,
+.bg-theme-gradient .border-end {
+    border-color: rgba(0, 0, 0, 0.1) !important;
 }

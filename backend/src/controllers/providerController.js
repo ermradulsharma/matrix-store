@@ -43,8 +43,8 @@ exports.createProvider = catchAsyncError(async (req, res, next) => {
 exports.getAllProviders = catchAsyncError(async (req, res, next) => {
     let query = {};
 
-    // Managers can only see their assigned providers
-    if (req.user.role === 'manager') {
+    // Managers and Admins can only see their assigned providers (created by/managed by them)
+    if (req.user.role === 'manager' || req.user.role === 'admin') {
         query.manager = req.user.id;
     }
 
@@ -104,8 +104,8 @@ exports.updateProvider = catchAsyncError(async (req, res, next) => {
     });
 });
 
-// Deactivate provider
-exports.deactivateProvider = catchAsyncError(async (req, res, next) => {
+// Toggle provider status
+exports.toggleProviderStatus = catchAsyncError(async (req, res, next) => {
     const provider = await Provider.findById(req.params.id);
 
     if (!provider) {
@@ -117,15 +117,45 @@ exports.deactivateProvider = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler("Access denied", 403));
     }
 
-    provider.status = 'inactive';
+    // Toggle status
+    const newStatus = provider.status === 'active' ? 'inactive' : 'active';
+    provider.status = newStatus;
     await provider.save();
 
-    // Also deactivate the user account
-    await User.findByIdAndUpdate(provider.user, { isActive: false });
+    // Also toggle the user account status
+    await User.findByIdAndUpdate(provider.user, { isActive: newStatus === 'active' });
 
     res.status(200).json({
         success: true,
-        message: "Provider deactivated successfully"
+        message: `Provider ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully`,
+        status: newStatus
+    });
+});
+
+// Delete provider
+exports.deleteProvider = catchAsyncError(async (req, res, next) => {
+    const provider = await Provider.findById(req.params.id);
+
+    if (!provider) {
+        return next(new ErrorHandler("Provider not found", 404));
+    }
+
+    // Check access rights
+    if (req.user.role === 'manager' && provider.manager.toString() !== req.user.id) {
+        return next(new ErrorHandler("Access denied", 403));
+    }
+
+    // Delete the provider profile
+    await provider.remove();
+
+    // Delete the associated user account
+    if (provider.user) {
+        await User.findByIdAndDelete(provider.user);
+    }
+
+    res.status(200).json({
+        success: true,
+        message: "Provider and associated user account deleted successfully"
     });
 });
 

@@ -36,3 +36,81 @@
         transform: rotate(360deg);
     }
 }
+
+/* Sidebar Theme */
+.sidebar {
+    background: linear-gradient(45deg, rgb(78, 115, 223), rgb(34, 74, 190)) !important;
+}
+
+.sidebar .nav-item a {
+    color: #ffffff;
+    border-radius: 8px;
+    margin: 4px 10px;
+    transition: all 0.3s ease;
+}
+
+/* Active Link Gradient (Teal) */
+.sidebar .nav-item a.active {
+    background: linear-gradient(45deg, rgb(54, 185, 204), rgb(37, 131, 145));
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Hover Link Gradient (Green) */
+.sidebar .nav-item a:hover:not(.active) {
+    background: linear-gradient(45deg, rgb(28, 200, 138), rgb(19, 133, 92));
+    color: white;
+    transform: translateX(5px);
+}
+
+/* Header Theme */
+.dashboard-header-theme {
+    background: linear-gradient(45deg, rgb(78, 115, 223), rgb(34, 74, 190));
+}
+
+/* Button Themes */
+.btn-primary {
+    background: linear-gradient(45deg, rgb(78, 115, 223), rgb(34, 74, 190)) !important;
+    border: none !important;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    filter: brightness(110%);
+    box-shadow: 0 4px 10px rgba(78, 115, 223, 0.4);
+}
+
+.btn-success {
+    background: linear-gradient(45deg, rgb(28, 200, 138), rgb(19, 133, 92)) !important;
+    border: none !important;
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    filter: brightness(110%);
+    box-shadow: 0 4px 10px rgba(28, 200, 138, 0.4);
+}
+
+.btn-info {
+    background: linear-gradient(45deg, rgb(54, 185, 204), rgb(37, 131, 145)) !important;
+    border: none !important;
+    color: white !important;
+    transition: all 0.3s ease;
+}
+
+.btn-info:hover {
+    filter: brightness(110%);
+    box-shadow: 0 4px 10px rgba(54, 185, 204, 0.4);
+}
+
+.btn-warning {
+    background: linear-gradient(45deg, rgb(246, 194, 62), rgb(221, 162, 10)) !important;
+    border: none !important;
+    color: white !important;
+    transition: all 0.3s ease;
+}
+
+.btn-warning:hover {
+    filter: brightness(110%);
+    box-shadow: 0 4px 10px rgba(246, 194, 62, 0.4);
+}

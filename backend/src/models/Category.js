@@ -23,6 +23,11 @@ const categorySchema = new mongoose.Schema({
             type: String,
             required: true
         }
+    },
+    status: {
+        type: String,
+        enum: ['active', 'inactive'],
+        default: 'active'
     }
 
 },

@@ -247,14 +247,41 @@ exports.updateProfile = catchAsyncError(async (req, res, next) => {
 
 // For Admin
 
-// Update User Profile same as update profile function
-exports.updateUserProfile = catchAsyncError(async (req, res, next) => {
-  console.log("use this function");
+// Update User Profile (Admin/Super Admin) - Can update all fields including password
+exports.updateUserAdmin = catchAsyncError(async (req, res, next) => {
+  const { first_name, last_name, email, mobile_no, password } = req.body;
+
+  const user = await User.findById(req.params.id).select("+password");
+
+  if (!user) {
+    return next(new ErrorHandler(`User does not exist with Id: ${req.params.id}`, 404));
+  }
+
+  // Update simple fields
+  if (first_name) user.first_name = first_name;
+  if (last_name) user.last_name = last_name;
+  if (email) user.email = email;
+  if (mobile_no) user.mobile_no = mobile_no;
+
+  // Update name virtual/field if needed (though virtual usually auto-updates, but we stored it)
+  user.name = `${user.first_name} ${user.last_name}`;
+
+  // Update password if provided
+  if (password && password.trim() !== "") {
+    user.password = password; // Pre-save hook will hash it
+  }
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
 });
 
 // Create User -- Admin/Super Admin
 exports.createUser = catchAsyncError(async (req, res, next) => {
-  const { first_name, last_name, email, password, role, mobile_no } = req.body;
+  const { first_name, last_name, email, password, role, mobile_no, managedBy } = req.body;
 
   // Check hierarchy permissions
   const requesterRole = req.user.role;
@@ -274,7 +301,24 @@ exports.createUser = catchAsyncError(async (req, res, next) => {
       new ErrorHandler("Manager can only create Provider or Customer", 403)
     );
   }
-  // Super Admin can create any role (except maybe another Super Admin depending on policy, but letting it pass for now)
+
+  // Determine Manager
+  let managerId = req.user._id;
+
+  // If requester is Admin/SuperAdmin and managedBy is provided, use it
+  if ((requesterRole === 'admin' || requesterRole === 'super_admin') && managedBy) {
+    // Validate that the assigned manager exists and is actually a Manager (optional but good)
+    const assignedManager = await User.findById(managedBy);
+    if (!assignedManager) {
+      return next(new ErrorHandler("Assigned Manager not found", 404));
+    }
+    // If creating a provider, the manager should essentially be a manager role
+    if (role === 'provider' && assignedManager.role !== 'manager' && assignedManager.role !== 'admin' && assignedManager.role !== 'super_admin') {
+      // Providing flexibility: Admin can assign provider to themselves or another admin too, but usually it's a manager.
+      // adhering to strictness might be annoying, lets just check existence for now.
+    }
+    managerId = managedBy;
+  }
 
   const name = `${first_name} ${last_name}`;
   let username = first_name.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -300,7 +344,7 @@ exports.createUser = catchAsyncError(async (req, res, next) => {
     password,
     role,
     mobile_no,
-    managedBy: req.user._id, // Track who created this user
+    managedBy: managerId, // Track who manages this user
     image: {
       public_id: "default_id",
       url: "https://example.com/default-avatar.png",
@@ -343,22 +387,19 @@ exports.getAllUsers = catchAsyncError(async (req, res, next) => {
       filter = {};
     }
   } else if (role === "admin") {
-    // Admin sees Managers, Providers, Customers
-    // If queryRole is requested, ensure it's within allowed scope
+    // Admin sees Users they directly manage (Managers, Providers, Customers)
     const allowedRoles = ["manager", "provider", "customer"];
-    if (queryRole && allowedRoles.includes(queryRole)) {
-      filter = { role: queryRole };
-    } else {
-      filter = { role: { $in: allowedRoles } };
-    }
+    filter = {
+      role: queryRole && allowedRoles.includes(queryRole) ? queryRole : { $in: allowedRoles },
+      managedBy: req.user.id
+    };
   } else if (role === "manager") {
-    // Manager sees Providers and Customers
+    // Manager sees Users they directly manage (Providers, Customers)
     const allowedRoles = ["provider", "customer"];
-    if (queryRole && allowedRoles.includes(queryRole)) {
-      filter = { role: queryRole };
-    } else {
-      filter = { role: { $in: allowedRoles } };
-    }
+    filter = {
+      role: queryRole && allowedRoles.includes(queryRole) ? queryRole : { $in: allowedRoles },
+      managedBy: req.user.id
+    };
   } else {
     return next(new ErrorHandler("Not authorized to view users", 403));
   }

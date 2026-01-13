@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile, updateUserProfile } from '../../../services/api';
+import { useAuth } from '../../../context/AuthContext';
 
 const UpdateProfile = () => {
     const [formData, setFormData] = useState({
@@ -13,7 +14,7 @@ const UpdateProfile = () => {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
     const navigate = useNavigate();
-    // const { setUser } = useAuth(); // Update context too if possible (Currently unused)
+    const { user } = useAuth();
 
     useEffect(() => {
         loadData();
@@ -49,7 +50,8 @@ const UpdateProfile = () => {
             if (res.success) {
                 setSuccess("Profile updated successfully");
                 // Optional: update context user if name changed
-                setTimeout(() => navigate('/dashboard/profile'), 1500);
+                const rootPath = user?.role === 'super_admin' ? '/dashboard' : `/${user?.role}`;
+                setTimeout(() => navigate(`${rootPath}/profile`), 1500);
             }
         } catch (err) {
             setError(err.response?.data?.message || "Update failed");

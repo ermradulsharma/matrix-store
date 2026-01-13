@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Card, Alert } from 'react-bootstrap';
-import { createProvider, fetchUsers } from '../../../services/api';
-import { useNavigate } from 'react-router-dom';
+import { Form, Button, Card, Alert, Spinner } from 'react-bootstrap';
+import { fetchProviderDetails, updateProvider } from '../../../services/api';
+import { useNavigate, useParams } from 'react-router-dom';
+import { FaEdit, FaArrowLeft } from 'react-icons/fa';
 
-const CreateProvider = () => {
+const EditProvider = ({ redirectPath }) => {
     const navigate = useNavigate();
-    const [users, setUsers] = useState([]);
+    const { id } = useParams();
+    const [loading, setLoading] = useState(true);
+    const [updating, setUpdating] = useState(false);
+    const [error, setError] = useState('');
     const [formData, setFormData] = useState({
-        userId: '',
         companyName: '',
         businessRegistration: '',
         contactPerson: {
@@ -15,7 +18,6 @@ const CreateProvider = () => {
             email: '',
             phone: ''
         },
-        productCategories: [],
         bankDetails: {
             accountName: '',
             accountNumber: '',
@@ -23,23 +25,37 @@ const CreateProvider = () => {
             swiftCode: ''
         }
     });
-    const [error, setError] = useState('');
 
     useEffect(() => {
-        // Fetch potential users to link to provider
-        // In a real app, you might want to filter for users with 'provider' role who don't have a profile yet
-        const loadUsers = async () => {
+        const loadProvider = async () => {
             try {
-                const res = await fetchUsers();
+                const res = await fetchProviderDetails(id);
                 if (res.data.success) {
-                    setUsers(res.data.users.filter(u => u.role === 'provider'));
+                    const p = res.data.provider;
+                    setFormData({
+                        companyName: p.companyName,
+                        businessRegistration: p.businessRegistration,
+                        contactPerson: {
+                            name: p.contactPerson.name,
+                            email: p.contactPerson.email,
+                            phone: p.contactPerson.phone
+                        },
+                        bankDetails: {
+                            accountName: p.bankDetails.accountName,
+                            accountNumber: p.bankDetails.accountNumber,
+                            bankName: p.bankDetails.bankName,
+                            swiftCode: p.bankDetails.swiftCode
+                        }
+                    });
                 }
             } catch (err) {
-                console.error('Error loading users:', err);
+                setError('Error loading provider details');
+            } finally {
+                setLoading(false);
             }
         };
-        loadUsers();
-    }, []);
+        loadProvider();
+    }, [id]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -62,19 +78,30 @@ const CreateProvider = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setUpdating(true);
         try {
-            const res = await createProvider(formData);
+            const res = await updateProvider(id, formData);
             if (res.data.success) {
-                navigate('..');
+                navigate(redirectPath || '..'); // Use redirectPath if provided
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Error creating provider');
+            setError(err.response?.data?.message || 'Error updating provider');
+        } finally {
+            setUpdating(false);
         }
     };
 
+    if (loading) return <div className="text-center p-5"><Spinner animation="border" /></div>;
+
     return (
-        <div className="container-fluid">
-            <h2 className="mb-4">Create New Provider</h2>
+        <div className="container-fluid p-4">
+            <div className="d-flex align-items-center mb-4">
+                <Button variant="link" className="text-decoration-none me-2 p-0" onClick={() => navigate(redirectPath || '..')}>
+                    <FaArrowLeft /> Back
+                </Button>
+                <h2 className="mb-0">Edit Provider</h2>
+            </div>
+
             {error && <Alert variant="danger">{error}</Alert>}
 
             <Card className="shadow-sm">
@@ -84,29 +111,17 @@ const CreateProvider = () => {
                         <div className="row mb-3">
                             <div className="col-md-6">
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Link User Account</Form.Label>
-                                    <Form.Select name="userId" value={formData.userId} onChange={handleChange} required>
-                                        <option value="">Select User</option>
-                                        {users.map(user => (
-                                            <option key={user._id} value={user._id}>
-                                                {user.first_name} {user.last_name} ({user.email})
-                                            </option>
-                                        ))}
-                                    </Form.Select>
-                                </Form.Group>
-                            </div>
-                            <div className="col-md-6">
-                                <Form.Group className="mb-3">
                                     <Form.Label>Company Name</Form.Label>
                                     <Form.Control type="text" name="companyName" value={formData.companyName} onChange={handleChange} required />
                                 </Form.Group>
                             </div>
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Business Registration Number</Form.Label>
+                                    <Form.Control type="text" name="businessRegistration" value={formData.businessRegistration} onChange={handleChange} required />
+                                </Form.Group>
+                            </div>
                         </div>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Business Registration Number</Form.Label>
-                            <Form.Control type="text" name="businessRegistration" value={formData.businessRegistration} onChange={handleChange} required />
-                        </Form.Group>
 
                         <h5 className="mb-3 mt-4">Contact Person</h5>
                         <div className="row mb-3">
@@ -159,8 +174,10 @@ const CreateProvider = () => {
                         </div>
 
                         <div className="d-flex justify-content-end">
-                            <Button variant="secondary" className="me-2" onClick={() => navigate('..')}>Cancel</Button>
-                            <Button variant="primary" type="submit">Create Provider</Button>
+                            <Button variant="secondary" className="me-2" onClick={() => navigate(redirectPath || '..')}>Cancel</Button>
+                            <Button variant="primary" type="submit" disabled={updating}>
+                                {updating ? <Spinner as="span" animation="border" size="sm" /> : <><FaEdit className="me-2" /> Update Provider</>}
+                            </Button>
                         </div>
                     </Form>
                 </Card.Body>
@@ -169,4 +186,4 @@ const CreateProvider = () => {
     );
 };
 
-export default CreateProvider;
+export default EditProvider;

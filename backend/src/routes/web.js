@@ -70,7 +70,7 @@ router.put(
   "/admin/user/:id",
   isauthenticate,
   isAuthorizedRoles("admin", "super_admin"),
-  userController.updateProfile
+  userController.updateUserAdmin
 );
 router.delete(
   "/admin/user/:id",
@@ -99,6 +99,12 @@ router.delete(
   isauthenticate,
   isAuthorizedRoles("admin", "super_admin"),
   categoryController.deleteCategory
+);
+router.put(
+  "/category/:id/toggle-status",
+  isauthenticate,
+  isAuthorizedRoles("super_admin"),
+  categoryController.toggleCategoryStatus
 );
 
 // Product Routes (Public)
@@ -164,10 +170,16 @@ router.put(
   providerController.updateProvider
 );
 router.put(
-  "/provider/:id/deactivate",
+  "/provider/:id/toggle-status",
   isauthenticate,
   isAuthorizedRoles("manager", "admin", "super_admin"),
-  providerController.deactivateProvider
+  providerController.toggleProviderStatus
+);
+router.delete(
+  "/provider/:id",
+  isauthenticate,
+  isAuthorizedRoles("manager", "admin", "super_admin"),
+  providerController.deleteProvider
 );
 router.get(
   "/provider/:id/performance",

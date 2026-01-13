@@ -4,19 +4,39 @@ const Product = require("../models/Product"); // Assuming Product model exists
 const Order = require("../models/Order"); // Assuming Order model exists
 
 exports.getSuperAdminStats = catchAsyncError(async (req, res, next) => {
-  const users = await User.find();
-  const products = await Product.countDocuments();
-  const orders = await Order.find();
+  let userFilter = {};
+  let productFilter = {};
+  let orderFilter = {};
+
+  // Hierarchy Filtering for Admin and Manager
+  if (req.user.role === 'admin' || req.user.role === 'manager') {
+    // 1. Get Users managed by the requester
+    const managedUsers = await User.find({ managedBy: req.user.id });
+    const managedUserIds = managedUsers.map(u => u._id);
+
+    userFilter = { _id: { $in: managedUserIds } };
+    productFilter = { user_id: { $in: managedUserIds } };
+    orderFilter = { user: { $in: managedUserIds } }; // Orders placed by my managed Customers
+  }
+
+  // Fetch Data with Filters
+  const users = await User.find(userFilter); // This might be redundant if we just fetched managedUsers, but keeps logic clean for super_admin
+  const products = await Product.countDocuments(productFilter);
+  const orders = await Order.find(orderFilter);
 
   // 1. Calculate Monthly Revenue (Last 6 Months)
-  const monthlyRevenue = await Order.aggregate([
-    {
-      $match: {
-        createdAt: {
-          $gte: new Date(new Date().setMonth(new Date().getMonth() - 6)),
-        },
+  // Add match stage for filtering
+  const revenueMatchStage = {
+    $match: {
+      createdAt: {
+        $gte: new Date(new Date().setMonth(new Date().getMonth() - 6)),
       },
+      ...orderFilter // Spread the order filter here (e.g., { user: { $in: [...] } })
     },
+  };
+
+  const monthlyRevenue = await Order.aggregate([
+    revenueMatchStage,
     {
       $group: {
         _id: { $month: "$createdAt" },
@@ -46,8 +66,9 @@ exports.getSuperAdminStats = catchAsyncError(async (req, res, next) => {
     total: item.total,
   }));
 
-  // 2. Order Status Distribution
+  // 2. Order Status Distribution with Filter
   const orderStatusCounts = await Order.aggregate([
+    { $match: orderFilter }, // Apply filter
     { $group: { _id: "$orderStatus", count: { $sum: 1 } } },
   ]);
   const pieData = orderStatusCounts.map((item) => ({
@@ -55,11 +76,51 @@ exports.getSuperAdminStats = catchAsyncError(async (req, res, next) => {
     value: item.count,
   }));
 
-  // 3. Recent Orders (Last 5)
-  const recentOrders = await Order.find()
+  // 3. Recent Orders (Last 5) with Filter
+  const recentOrders = await Order.find(orderFilter)
     .sort({ createdAt: -1 })
     .limit(5)
     .populate("user", "name email");
+
+  // 4. Geographic Sales Distribution
+  // Sales by Country
+  const salesByCountry = await Order.aggregate([
+    { $match: orderFilter },
+    {
+      $group: {
+        _id: "$shippingInfo.country",
+        totalSales: { $sum: "$totalPrice" },
+        count: { $sum: 1 }
+      }
+    },
+    { $sort: { totalSales: -1 } }
+  ]);
+
+  // Sales by State
+  const salesByState = await Order.aggregate([
+    { $match: orderFilter },
+    {
+      $group: {
+        _id: "$shippingInfo.state",
+        totalSales: { $sum: "$totalPrice" },
+        count: { $sum: 1 }
+      }
+    },
+    { $sort: { totalSales: -1 } }
+  ]);
+
+  // Sales by City
+  const salesByCity = await Order.aggregate([
+    { $match: orderFilter },
+    {
+      $group: {
+        _id: "$shippingInfo.city",
+        totalSales: { $sum: "$totalPrice" },
+        count: { $sum: 1 }
+      }
+    },
+    { $sort: { totalSales: -1 } }
+  ]);
 
   const stats = {
     users: {
@@ -80,6 +141,11 @@ exports.getSuperAdminStats = catchAsyncError(async (req, res, next) => {
     revenueData,
     pieData,
     recentOrders,
+    geoStats: {
+      country: salesByCountry.map(item => ({ name: item._id, value: item.totalSales, count: item.count })),
+      state: salesByState.map(item => ({ name: item._id, value: item.totalSales, count: item.count })),
+      city: salesByCity.map(item => ({ name: item._id, value: item.totalSales, count: item.count }))
+    }
   };
 
   res.status(200).json({

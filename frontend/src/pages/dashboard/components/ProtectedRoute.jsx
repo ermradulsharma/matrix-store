@@ -19,10 +19,17 @@ const ProtectedRoute = ({ allowedRoles }) => {
 
     if (allowedRoles && !allowedRoles.includes(user.role)) {
         // Redirect to appropriate dashboard based on role, or home if no dashboard access
-        if (user.role === 'customer') {
+        if (user.role === 'super_admin') {
+            return <Navigate to="/dashboard" replace />;
+        } else if (user.role === 'admin') {
+            return <Navigate to="/admin" replace />;
+        } else if (user.role === 'manager') {
+            return <Navigate to="/manager" replace />;
+        } else if (user.role === 'provider') {
+            return <Navigate to="/provider" replace />;
+        } else {
             return <Navigate to="/" replace />;
         }
-        return <Navigate to="/dashboard" replace />;
     }
 
     return <Outlet />;

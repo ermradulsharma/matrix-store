@@ -23,13 +23,13 @@ const Login = () => {
         if (result.success) {
             const role = result.user.role;
             if (role === 'super_admin') {
-                navigate('/dashboard/super-admin');
+                navigate('/dashboard');
             } else if (role === 'admin') {
-                navigate('/dashboard/admin');
+                navigate('/admin');
             } else if (role === 'manager') {
-                navigate('/dashboard/manager');
+                navigate('/manager');
             } else if (role === 'provider') {
-                navigate('/dashboard/provider');
+                navigate('/provider');
             } else {
                 navigate('/profile');
             }

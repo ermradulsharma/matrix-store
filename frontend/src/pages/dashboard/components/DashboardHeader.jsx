@@ -14,7 +14,7 @@ const DashboardHeader = () => {
     };
 
     return (
-        <div className="dashboard-header bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
+        <div className="dashboard-header dashboard-header-theme border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
             <div>
                 <h4 className="mb-0">Dashboard</h4>
             </div>
@@ -30,9 +30,9 @@ const DashboardHeader = () => {
 
                 {/* User Dropdown */}
                 <Dropdown align="end">
-                    <Dropdown.Toggle variant="link" className="text-decoration-none text-dark d-flex align-items-center gap-2 p-0">
+                    <Dropdown.Toggle variant="link" className="text-decoration-none text-dark d-flex align-items-center gap-2 p-0 border-0">
                         <div className="d-flex align-items-center gap-2">
-                            <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>
+                            <div className="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>
                                 <FaUser />
                             </div>
                             <div className="text-start d-none d-md-block">
@@ -43,10 +43,16 @@ const DashboardHeader = () => {
                     </Dropdown.Toggle>
 
                     <Dropdown.Menu>
-                        <Dropdown.Item onClick={() => navigate('/profile')}>
+                        <Dropdown.Item onClick={() => {
+                            const rootPath = user?.role === 'super_admin' ? '/dashboard' : `/${user?.role}`;
+                            navigate(`${rootPath}/profile`);
+                        }}>
                             <FaUser className="me-2" /> My Profile
                         </Dropdown.Item>
-                        <Dropdown.Item>
+                        <Dropdown.Item onClick={() => {
+                            const rootPath = user?.role === 'super_admin' ? '/dashboard' : `/${user?.role}`;
+                            navigate(`${rootPath}/settings`);
+                        }}>
                             <FaCog className="me-2" /> Settings
                         </Dropdown.Item>
                         <Dropdown.Divider />

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Button, Badge, Spinner } from 'react-bootstrap';
 import { fetchUsers, deleteUserProfile } from '../../../services/api';
-import { FaTrash, FaUserTie, FaEye } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { FaTrash, FaUserTie, FaEye, FaEdit } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
 
 const ManagerList = () => {
+    const navigate = useNavigate();
     const [managers, setManagers] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -45,7 +46,7 @@ const ManagerList = () => {
         <div className="container-fluid">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2>Manage Managers</h2>
-                <Button variant="primary">
+                <Button variant="primary" onClick={() => navigate('new')}>
                     <FaUserTie className="me-2" /> Create New Manager
                 </Button>
             </div>
@@ -76,10 +77,13 @@ const ManagerList = () => {
                                         <td>{manager.managedBy?.first_name || 'N/A'}</td>
                                         <td>
                                             <div className="btn-group">
-                                                <Link to={`/dashboard/user/${manager._id}`} className="btn btn-sm btn-info text-white me-2">
+                                                <Link to={`edit/${manager._id}`} className="btn btn-sm btn-primary me-2" title="Edit Manager">
+                                                    <FaEdit />
+                                                </Link>
+                                                <Link to={`view/${manager._id}`} className="btn btn-sm btn-info text-white me-2" title="View Profile">
                                                     <FaEye />
                                                 </Link>
-                                                <Button variant="danger" size="sm" onClick={() => deleteUser(manager._id)}>
+                                                <Button variant="danger" size="sm" onClick={() => deleteUser(manager._id)} title="Delete Manager">
                                                     <FaTrash />
                                                 </Button>
                                             </div>

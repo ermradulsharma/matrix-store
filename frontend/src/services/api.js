@@ -199,12 +199,62 @@ export const fetchProductById = async (id) => {
 /** Fetch all product categories */
 export const fetchCategories = async () => {
   try {
-    // UPDATED: Endpoint changed from /get-category to /categories
     const res = await api.get("/categories");
-    // Backend returns { success, categories }
     return res.data.categories || [];
   } catch (error) {
     console.error("Error fetching categories:", error);
+    throw error;
+  }
+};
+
+export const createCategory = async (categoryData) => {
+  try {
+    const config = { headers: { "Content-Type": "application/json" } };
+    const res = await api.post("/category/new", categoryData, config);
+    return res.data;
+  } catch (error) {
+    console.error("Error creating category:", error);
+    throw error;
+  }
+};
+
+export const updateCategory = async (id, categoryData) => {
+  try {
+    const config = { headers: { "Content-Type": "application/json" } };
+    const res = await api.put(`/category/${id}`, categoryData, config);
+    return res.data;
+  } catch (error) {
+    console.error("Error updating category:", error);
+    throw error;
+  }
+};
+
+export const deleteCategory = async (id) => {
+  try {
+    const res = await api.delete(`/category/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error("Error deleting category:", error);
+    throw error;
+  }
+};
+
+export const toggleCategoryStatus = async (id) => {
+  try {
+    const res = await api.put(`/category/${id}/toggle-status`);
+    return res.data;
+  } catch (error) {
+    console.error("Error toggling category status:", error);
+    throw error;
+  }
+};
+
+export const fetchCategoryDetails = async (id) => {
+  try {
+    const res = await api.get(`/category/${id}`);
+    return res.data.category;
+  } catch (error) {
+    console.error("Error fetching category details:", error);
     throw error;
   }
 };
@@ -359,7 +409,8 @@ export const createProvider = (data) => api.post("/provider/create", data);
 export const fetchProviders = () => api.get("/providers");
 export const fetchProviderDetails = (id) => api.get(`/provider/${id}`);
 export const updateProvider = (id, data) => api.put(`/provider/${id}`, data);
-export const deactivateProvider = (id) => api.put(`/provider/${id}/deactivate`);
+export const toggleProviderStatus = (id) => api.put(`/provider/${id}/toggle-status`);
+export const deleteProvider = (id) => api.delete(`/provider/${id}`);
 export const fetchProviderPerformance = (id) =>
   api.get(`/provider/${id}/performance`);
 
@@ -388,5 +439,7 @@ export const markInvoicePaid = (id, data) =>
 
 export const fetchUsers = () => api.get("/admin/users");
 export const deleteUserProfile = (id) => api.delete(`/admin/user/${id}`);
+export const createUser = (userData) => api.post("/admin/user/new", userData);
+export const updateUserAdmin = (id, userData) => api.put(`/admin/user/${id}`, userData);
 
 export default api;
