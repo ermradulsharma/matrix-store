@@ -4,28 +4,30 @@ Matrix Store is a modern, full-stack e-commerce platform built with the MERN sta
 
 ## Features
 
-- **Role-Based Access Control (RBAC)**: secure hierarchy with 5 distinct roles:
-  - **Super Admin**: Full system control, manage all users including Admins.
+- **Role-Based Access Control (RBAC)**: Secure hierarchy with 5 distinct roles:
+  - **Super Admin**: Full system control, manage all users including Admins, global search, and advanced configuration.
   - **Admin**: Oversee Managers, Providers, and Customers.
   - **Manager**: Manage assigned Providers and specialized workflows.
   - **Provider**: Manage products and view assigned requirements.
   - **Customer**: Browse products, place orders, and manage personal profile.
 - **Advanced Dashboard**:
-  - **System Overview**: Graphical charts for revenue, order status, and user distribution.
+  - **System Overview**: Graphical charts for revenue (Yearly/Monthly/Weekly/Daily trends), order status, and user distribution.
+  - **Global Search**: Instantly find Users, Products, or Orders via the dashboard header with smart role-based navigation.
   - **User Management**: Dedicated lists with "View Profile" functionality for all roles.
-  - **Analytics**: Detailed reports and performance metrics.
+  - **Analytics**: Detailed reports with filtering (Year/Period) and downloadable PDF exports.
 - **Product Management**: Create, update, and manage inventory with image support.
 - **Order Processing**: Complete checkout flow, order tracking, and status updates.
-- **Authentication**: Secure JWT-based auth with HTTP-only cookies and password encryption.
+- **Authentication**: Secure JWT-based auth with HTTP-only cookies, password encryption, and responsive login/register flows.
 
 ## Tech Stack
 
 - **Frontend**:
   - React.js (v18)
   - React Router DOM (v6)
-  - Context API (Auth, Cart, Wishlist)
+  - React Context API (Auth, Cart, Wishlist)
   - React Bootstrap & Bootstrap 5
-  - Recharts (for Dashboard Analytics)
+  - Recharts (for Dynamic Analytics & Charts)
+  - jsPDF & autoTable (for PDF Reporting)
   - React Icons
 - **Backend**:
   - Node.js & Express.js
@@ -117,7 +119,7 @@ npm start
 matrix-store/
 ├── backend/
 │   ├── src/
-│   │   ├── controllers/   # Route Controllers
+│   │   ├── controllers/   # Route Controllers (Dashboard, Order, Product, Search, User)
 │   │   ├── models/        # Mongoose Models (User, Product, Order, etc.)
 │   │   ├── routes/        # API Routes
 │   │   ├── seeder/        # Database Seed scripts
@@ -128,10 +130,11 @@ matrix-store/
     ├── src/
     │   ├── context/       # React Context (Auth, Cart, Wishlist)
     │   ├── pages/
-    │   │   ├── dashboard/ # Dashboard Modules (SuperAdmin, Admin, Manager, Provider)
+    │   │   ├── dashboard/ # Dashboard Modules (SuperAdmin, Admin, Manager, etc.) & Components
+    │   │   ├── auth/      # Login/Register Pages
     │   │   └── frontend/  # Public Store pages (Home, Shop, Cart)
-    │   └── services/      # Axios API definition
-    └── App.js             # Main Router
+    │   ├── services/      # Axios API definition
+    │   └── App.js         # Main Router
 ```
 
 ## Contributing
