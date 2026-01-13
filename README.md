@@ -4,16 +4,16 @@ Matrix Store is a modern, full-stack e-commerce platform built with the MERN sta
 
 ## Features
 
-- **Role-Based Access Control (RBAC)**: Secure hierarchy with 5 distinct roles:
-  - **Super Admin**: Full system control, manage all users including Admins, global search, and advanced configuration.
-  - **Admin**: Oversee Managers, Providers, and Customers.
-  - **Manager**: Manage assigned Providers and specialized workflows.
-  - **Provider**: Manage products and view assigned requirements.
-  - **Customer**: Browse products, place orders, and manage personal profile.
+- **Strict Role-Based Hierarchy (RBAC)**: secure management chain:
+  - **Super Admin**: Highest authority. Manages **Admins**.
+  - **Admin**: Manages **Managers**. Reports to Super Admin.
+  - **Manager**: Manages **Providers**. Reports to Admin.
+  - **Provider**: Manages Products. Reports to Manager.
+  - **Customer**: End-user. Browse products, place orders, and manage personal profile.
 - **Advanced Dashboard**:
-  - **System Overview**: Graphical charts for revenue (Yearly/Monthly/Weekly/Daily trends), order status, and user distribution.
+  - **System Overview**: Graphical charts for revenue (Yearly/Monthly/Weekly/Daily trends) with "Smart" granularity logic.
   - **Global Search**: Instantly find Users, Products, or Orders via the dashboard header with smart role-based navigation.
-  - **User Management**: Dedicated lists with "View Profile" functionality for all roles.
+  - **User Management**: Strictly scoped views based on hierarchy (e.g., Admins only see their Managers).
   - **Analytics**: Detailed reports with filtering (Year/Period) and downloadable PDF exports.
 - **Product Management**: Create, update, and manage inventory with image support.
 - **Order Processing**: Complete checkout flow, order tracking, and status updates.
@@ -86,14 +86,18 @@ SMTP_PASSWORD=your_app_specific_password
 
 ### 1. Seed Database
 
-Initialize the database with default roles and demo data (Users, Products, Orders).
+Initialize the database with the **Advanced Seed Script** to generate the full hierarchy and "Smart" historical data for testing charts.
 
 ```bash
 cd backend
-# Seed Roles (Required first)
-npm run seed
 
-# Seed Full Demo Data (Users, Products, Orders)
+# Option A: Advanced Seed (Recommended)
+# Creates: Hierarchy (SuperAdmin->Admin->Manager->Provider) + 3 Years of smart Order data
+node seed_advanced_data.js
+
+# Option B: Basic Seed
+# Creates: Basic roles and random data
+npm run seed
 node create_full_demo_data.js
 ```
 
@@ -119,20 +123,21 @@ npm start
 matrix-store/
 ├── backend/
 │   ├── src/
-│   │   ├── controllers/   # Route Controllers (Dashboard, Order, Product, Search, User)
+│   │   ├── controllers/   # Route Controllers
 │   │   ├── models/        # Mongoose Models (User, Product, Order, etc.)
 │   │   ├── routes/        # API Routes
 │   │   ├── seeder/        # Database Seed scripts
-│   │   └── utils/         # Helper functions (JWT, Email, ErrorHandler)
+│   │   └── utils/         # Helper functions
+│   ├── seed_advanced_data.js # Advanced Data Generator
 │   ├── config/            # DB Connection logic
 │   └── index.js           # App Entry point
 └── frontend/
     ├── src/
-    │   ├── context/       # React Context (Auth, Cart, Wishlist)
+    │   ├── context/       # React Context
     │   ├── pages/
-    │   │   ├── dashboard/ # Dashboard Modules (SuperAdmin, Admin, Manager, etc.) & Components
+    │   │   ├── dashboard/ # Dashboard Modules (SuperAdmin, Admin, Manager, etc.)
     │   │   ├── auth/      # Login/Register Pages
-    │   │   └── frontend/  # Public Store pages (Home, Shop, Cart)
+    │   │   └── frontend/  # Public Store pages
     │   ├── services/      # Axios API definition
     │   └── App.js         # Main Router
 ```
