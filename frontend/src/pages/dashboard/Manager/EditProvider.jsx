@@ -96,7 +96,7 @@ const EditProvider = ({ redirectPath }) => {
     return (
         <div className="container-fluid p-4">
             <div className="d-flex align-items-center mb-4">
-                <Button variant="link" className="text-decoration-none me-2 p-0" onClick={() => navigate(redirectPath || '..')}>
+                <Button variant="link" className="text-decoration-none me-2 p-0" onClick={() => navigate(-1)}>
                     <FaArrowLeft /> Back
                 </Button>
                 <h2 className="mb-0">Edit Provider</h2>
@@ -174,7 +174,7 @@ const EditProvider = ({ redirectPath }) => {
                         </div>
 
                         <div className="d-flex justify-content-end">
-                            <Button variant="secondary" className="me-2" onClick={() => navigate(redirectPath || '..')}>Cancel</Button>
+                            <Button variant="secondary" className="me-2" onClick={() => navigate(-1)}>Cancel</Button>
                             <Button variant="primary" type="submit" disabled={updating}>
                                 {updating ? <Spinner as="span" animation="border" size="sm" /> : <><FaEdit className="me-2" /> Update Provider</>}
                             </Button>

@@ -69,11 +69,11 @@ const EditUserAccount = ({ redirectPath, title }) => {
 
     return (
         <div className="container-fluid p-4">
-            <div className="d-flex align-items-center mb-4">
+            <div className="d-flex align-items-center">
                 <Button variant="link" className="text-decoration-none me-2 p-0" onClick={() => navigate(redirectPath)}>
                     <FaArrowLeft /> Back
                 </Button>
-                <h2 className="mb-0">{title}</h2>
+                <h2>{title}</h2>
             </div>
 
             <div className="row justify-content-center">

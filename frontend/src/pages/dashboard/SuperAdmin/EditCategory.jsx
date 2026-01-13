@@ -75,7 +75,7 @@ const EditCategory = () => {
         try {
             const res = await updateCategory(id, updateData);
             if (res.success) {
-                navigate('../..'); // Go back to list (up two levels because of 'edit/:id')
+                navigate(-1); // Go back to list
             }
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to update category');
@@ -92,7 +92,7 @@ const EditCategory = () => {
 
     return (
         <Container fluid className="p-4">
-            <Button variant="light" className="mb-4 text-primary fw-bold" onClick={() => navigate('../..')}>
+            <Button variant="light" className="mb-4 text-primary fw-bold" onClick={() => navigate(-1)}>
                 <FaArrowLeft className="me-2" /> Back to Categories
             </Button>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, Spinner, Button, Badge } from 'react-bootstrap';
+import { Card, Spinner, Button, Badge, Container, Row, Col } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchUserDetails, getUserProfile } from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
@@ -42,73 +42,88 @@ const UserProfile = () => {
     const isMe = !id || (authUser && authUser._id === user._id);
 
     return (
-        <div className="container-fluid p-4">
-            <h2 className="mb-4">{isMe ? 'My Profile' : 'User Profile'}</h2>
-            <div className="row justify-content-center">
-                <div className="col-md-8">
-                    <Card className="shadow-sm">
-                        <Card.Body className="p-5">
-                            <div className="text-center mb-4">
-                                <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: '100px', height: '100px', fontSize: '2.5rem' }}>
-                                    {user.first_name?.charAt(0)}
-                                </div>
-                                <h3>{user.name}</h3>
-                                <Badge bg="info" className="text-capitalize">{user.role}</Badge>
-                            </div>
-
-                            <hr />
-
-                            <div className="row g-4 mt-2">
-                                <div className="col-md-6">
-                                    <div className="d-flex align-items-center">
-                                        <FaEnvelope className="text-muted me-3" size={20} />
-                                        <div>
-                                            <small className="text-muted d-block">Email</small>
-                                            <strong>{user.email}</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-md-6">
-                                    <div className="d-flex align-items-center">
-                                        <FaPhone className="text-muted me-3" size={20} />
-                                        <div>
-                                            <small className="text-muted d-block">Mobile</small>
-                                            <strong>{user.mobile_no || 'N/A'}</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-md-6">
-                                    <div className="d-flex align-items-center">
-                                        <FaUserTag className="text-muted me-3" size={20} />
-                                        <div>
-                                            <small className="text-muted d-block">Username</small>
-                                            <strong>{user.username}</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-md-6">
-                                    <div className="d-flex align-items-center">
-                                        <FaCalendarAlt className="text-muted me-3" size={20} />
-                                        <div>
-                                            <small className="text-muted d-block">Joined On</small>
-                                            <strong>{new Date(user.createdAt).toLocaleDateString()}</strong>
-                                        </div>
-                                    </div>
+        <Container fluid>
+            <Card className="border-0 shadow-sm rounded-3 overflow-hidden">
+                <Card.Header className="bg-primary bg-gradient p-4 text-white d-flex justify-content-between align-items-center">
+                    <h4>{isMe ? 'My Profile' : 'User Profile'}</h4>
+                    {isMe && (
+                        <Button variant="light" size="sm" className="d-flex align-items-center gap-1" onClick={() => navigate('/dashboard/profile/update')}>
+                            <FaEdit /> Edit Profile
+                        </Button>
+                    )}
+                </Card.Header>
+                <Card.Body>
+                    <Row className="align-items-center">
+                        <Col md={4} className="text-center border-end border-light-subtle mb-4 mb-md-0">
+                            <div className="position-relative d-inline-block">
+                                <div className="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm border border-4 border-white" style={{ width: '120px', height: '120px', fontSize: '3rem', fontWeight: 'bold' }}>
+                                    {user.first_name?.charAt(0).toUpperCase()}
                                 </div>
                             </div>
-
-                            {isMe && (
-                                <div className="text-center mt-5">
-                                    <Button variant="primary" onClick={() => navigate('/dashboard/profile/update')}>
-                                        <FaEdit className="me-2" /> Edit Profile
-                                    </Button>
-                                </div>
-                            )}
-                        </Card.Body>
-                    </Card>
-                </div>
-            </div>
-        </div>
+                            <h3 className="fw-bold text-dark mb-1">{user.name}</h3>
+                            <Badge bg="info" className="px-3 py-2 rounded-pill text-uppercase text-xs fw-bold letter-spacing-1">{user.role}</Badge>
+                        </Col>
+                        <Col md={8} className="ps-md-5">
+                            <h5 className="fw-bold text-secondary text-uppercase text-xs letter-spacing-1 mb-4">Contact Information</h5>
+                            <Row className="g-4">
+                                <Col sm={6}>
+                                    <div className="d-flex">
+                                        <div className="me-3 mt-1">
+                                            <div className="rounded-circle bg-light d-flex align-items-center justify-content-center" style={{ width: 36, height: 36 }}>
+                                                <FaEnvelope className="text-secondary" size={14} />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <small className="text-muted d-block text-xs text-uppercase fw-bold">Email Address</small>
+                                            <span className="text-dark fw-medium">{user.email}</span>
+                                        </div>
+                                    </div>
+                                </Col>
+                                <Col sm={6}>
+                                    <div className="d-flex">
+                                        <div className="me-3 mt-1">
+                                            <div className="rounded-circle bg-light d-flex align-items-center justify-content-center" style={{ width: 36, height: 36 }}>
+                                                <FaPhone className="text-secondary" size={14} />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <small className="text-muted d-block text-xs text-uppercase fw-bold">Mobile Number</small>
+                                            <span className="text-dark fw-medium">{user.mobile_no || 'N/A'}</span>
+                                        </div>
+                                    </div>
+                                </Col>
+                                <Col sm={6}>
+                                    <div className="d-flex">
+                                        <div className="me-3 mt-1">
+                                            <div className="rounded-circle bg-light d-flex align-items-center justify-content-center" style={{ width: 36, height: 36 }}>
+                                                <FaUserTag className="text-secondary" size={14} />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <small className="text-muted d-block text-xs text-uppercase fw-bold">Username</small>
+                                            <span className="text-dark fw-medium">{user.username}</span>
+                                        </div>
+                                    </div>
+                                </Col>
+                                <Col sm={6}>
+                                    <div className="d-flex">
+                                        <div className="me-3 mt-1">
+                                            <div className="rounded-circle bg-light d-flex align-items-center justify-content-center" style={{ width: 36, height: 36 }}>
+                                                <FaCalendarAlt className="text-secondary" size={14} />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <small className="text-muted d-block text-xs text-uppercase fw-bold">Joined On</small>
+                                            <span className="text-dark fw-medium">{new Date(user.createdAt).toLocaleDateString()}</span>
+                                        </div>
+                                    </div>
+                                </Col>
+                            </Row>
+                        </Col>
+                    </Row>
+                </Card.Body>
+            </Card>
+        </Container>
     );
 };
 

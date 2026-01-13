@@ -74,7 +74,7 @@ const CreateProviderUser = () => {
     return (
         <div className="container-fluid p-4">
             <div className="d-flex align-items-center mb-4">
-                <Button variant="link" className="text-decoration-none me-2 p-0" onClick={() => navigate('..')}>
+                <Button variant="link" className="text-decoration-none me-2 p-0" onClick={() => navigate(-1)}>
                     <FaArrowLeft /> Back
                 </Button>
                 <h2 className="mb-0">Create New Provider User</h2>

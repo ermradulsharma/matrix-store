@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Badge, Spinner, Alert } from 'react-bootstrap';
+import { Table, Button, Badge, Spinner, Alert, Container, Card } from 'react-bootstrap';
 import { fetchUsers, deleteUserProfile } from '../../../services/api';
 import { FaUserShield, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const AdminList = () => {
     const [admins, setAdmins] = useState([]);
@@ -48,51 +48,69 @@ const AdminList = () => {
     if (loading) return <div className="text-center p-5"><Spinner animation="border" /></div>;
 
     return (
-        <div className="container-fluid">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>Manage Admins</h2>
-                <Button variant="primary" onClick={() => navigate('/admins/new')}>
-                    <FaUserShield className="me-2" /> Create New Admin
-                </Button>
-            </div>
+        <Container fluid>
+            <Card className="border-0 shadow-sm rounded-3">
+                <Card.Header className="bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <div className="d-flex align-items-center">
+                        <FaUserShield className="text-primary me-2" size={20} />
+                        <h4 className="fw-bold text-dark mb-0">Manage Admins</h4>
+                    </div>
+                    <Button variant="primary" onClick={() => navigate('/admins/new')} className="d-flex align-items-center">
+                        <FaUserShield className="me-2" /> Create New Admin
+                    </Button>
+                </Card.Header>
+                <Card.Body className="p-0">
+                    {error && <Alert variant="danger" className="m-3">{error}</Alert>}
+                    {success && <Alert variant="success" className="m-3">{success}</Alert>}
 
-            {error && <Alert variant="danger">{error}</Alert>}
-            {success && <Alert variant="success">{success}</Alert>}
-
-            <div className="card shadow-sm">
-                <div className="card-body p-0">
-                    <Table responsive hover className="mb-0">
+                    <Table responsive hover className="mb-0 align-middle">
                         <thead className="bg-light">
                             <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Status</th>
-                                <th>Last Login</th>
-                                <th>Actions</th>
+                                <th className="ps-4 py-3 text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-0">Name</th>
+                                <th className="py-3 text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-0">Email</th>
+                                <th className="py-3 text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-0">Status</th>
+                                <th className="py-3 text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-0">Last Login</th>
+                                <th className="pe-4 py-3 text-end text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-0">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {admins.length > 0 ? (
                                 admins.map(admin => (
                                     <tr key={admin._id}>
-                                        <td>{admin.first_name} {admin.last_name}</td>
-                                        <td>{admin.email}</td>
-                                        <td>
-                                            <Badge bg={admin.isActive ? 'success' : 'danger'}>
+                                        <td className="ps-4 py-3">
+                                            <div className="d-flex align-items-center">
+                                                <div className="avatar rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-3" style={{ width: '40px', height: '40px', fontWeight: 'bold' }}>
+                                                    {admin.first_name.charAt(0)}
+                                                </div>
+                                                <div>
+                                                    <h6 className="mb-0 fw-bold text-dark">{admin.first_name} {admin.last_name}</h6>
+                                                    <small className="text-muted">@{admin.username || admin.first_name.toLowerCase()}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="py-3">
+                                            <span className="text-secondary text-sm font-weight-bold">{admin.email}</span>
+                                        </td>
+                                        <td className="py-3">
+                                            <Badge bg={admin.isActive ? 'success' : 'danger'} className="rounded-pill px-3">
                                                 {admin.isActive ? 'Active' : 'Inactive'}
                                             </Badge>
                                         </td>
-                                        <td>{admin.lastLogin ? new Date(admin.lastLogin).toLocaleDateString() : 'Never'}</td>
-                                        <td>
+                                        <td className="py-3">
+                                            <span className="text-secondary text-sm">
+                                                {admin.lastLogin ? new Date(admin.lastLogin).toLocaleDateString() : 'Never'}
+                                            </span>
+                                        </td>
+                                        <td className="pe-4 py-3 text-end">
                                             <div className="btn-group">
-                                                <Link to={`/admins/view/${admin._id}`} className="btn btn-sm btn-info text-white me-2">
-                                                    <FaEye />
-                                                </Link>
-                                                <Button variant="outline-primary" size="sm" onClick={() => navigate(`/admins/edit/${admin._id}`)} className="me-2">
-                                                    <FaEdit />
+                                                <Button variant="link" size="sm" className="text-info p-1" title="View Details" onClick={() => navigate(`/admins/view/${admin._id}`)}>
+                                                    <FaEye size={16} />
                                                 </Button>
-                                                <Button variant="outline-danger" size="sm" onClick={() => handleDelete(admin._id)}>
-                                                    <FaTrash />
+                                                <Button variant="link" size="sm" className="text-primary p-1" title="Edit" onClick={() => navigate(`/admins/edit/${admin._id}`)}>
+                                                    <FaEdit size={16} />
+                                                </Button>
+                                                <Button variant="link" size="sm" className="text-danger p-1" title="Delete" onClick={() => handleDelete(admin._id)}>
+                                                    <FaTrash size={16} />
                                                 </Button>
                                             </div>
                                         </td>
@@ -100,14 +118,21 @@ const AdminList = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="5" className="text-center py-4">No admins found</td>
+                                    <td colSpan="5" className="text-center py-5">
+                                        <div className="d-flex flex-column align-items-center justify-content-center">
+                                            <div className="text-muted mb-2">
+                                                <FaUserShield size={40} className="opacity-25" />
+                                            </div>
+                                            <p className="text-muted mb-0">No admins found</p>
+                                        </div>
+                                    </td>
                                 </tr>
                             )}
                         </tbody>
                     </Table>
-                </div>
-            </div>
-        </div>
+                </Card.Body>
+            </Card>
+        </Container>
     );
 };
 

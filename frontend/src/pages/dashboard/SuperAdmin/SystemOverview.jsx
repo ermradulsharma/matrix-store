@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Badge, Spinner, Button, Table, Container, Tab, Nav } from 'react-bootstrap';
+import { Card, Row, Col, Badge, Spinner, Button, Table, Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import {
     FaUsers, FaShoppingCart, FaStore, FaMoneyBillWave,
     FaUserShield, FaUserTie, FaUser, FaBoxOpen, FaDownload,
-    FaChartLine, FaChartPie, FaGlobeAmericas, FaMapMarkerAlt, FaCity, FaFlag
+    FaChartLine, FaChartPie
 } from 'react-icons/fa';
 import { fetchDashboardStats } from '../../../services/api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import SalesMap from '../components/SalesMap';
 
 const SystemOverview = () => {
     const [stats, setStats] = useState(null);
@@ -93,41 +92,6 @@ const SystemOverview = () => {
         { bg: 'linear-gradient(45deg, #f6c23e, #dda20a)', text: 'white', icon: FaUsers, title: 'Total Users', value: stats?.users?.total || 0 },
     ];
 
-    const GeoTable = ({ data, icon: Icon, title, color }) => (
-        <Card className="border-0 shadow-sm h-100">
-            <Card.Header className="bg-white py-3 border-bottom-0 d-flex align-items-center">
-                <Icon className={`me-2 text-${color}`} />
-                <h6 className="fw-bold mb-0">{title}</h6>
-            </Card.Header>
-            <Card.Body className="p-0">
-                <div className="table-responsive" style={{ maxHeight: '300px' }}>
-                    <Table hover className="mb-0 align-middle">
-                        <thead className="bg-light text-muted small">
-                            <tr>
-                                <th className="border-0 ps-4">Name</th>
-                                <th className="border-0 text-end">Sales</th>
-                                <th className="border-0 text-end pe-4">Count</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {data && data.length > 0 ? (
-                                data.map((item, idx) => (
-                                    <tr key={idx}>
-                                        <td className="ps-4 fw-medium">{item.name || 'Unknown'}</td>
-                                        <td className="text-end text-success fw-bold">${item.value.toLocaleString()}</td>
-                                        <td className="text-end pe-4">{item.count}</td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr><td colSpan="3" className="text-center text-muted small py-3">No Data</td></tr>
-                            )}
-                        </tbody>
-                    </Table>
-                </div>
-            </Card.Body>
-        </Card>
-    );
-
     return (
         <Container fluid className="p-4 bg-light min-vh-100">
             <div className="d-flex justify-content-between align-items-center mb-4">
@@ -207,57 +171,17 @@ const SystemOverview = () => {
                 </Col>
             </Row>
 
-            {/* Geographic Analysis */}
-            <h5 className="fw-bold text-dark mb-3"><FaGlobeAmericas className="me-2 text-primary" /> Geographic Sales Analysis</h5>
-            <Row className="g-4 mb-4">
-                <Col lg={6}>
-                    <SalesMap data={stats?.geoStats} />
-                </Col>
-                <Col lg={6}>
-                    <Tab.Container defaultActiveKey="country">
-                        <Card className="border-0 shadow-sm h-100">
-                            <Card.Header className="bg-white border-bottom-0 pt-3 px-3">
-                                <Nav variant="pills" className="nav-pills-custom">
-                                    <Nav.Item>
-                                        <Nav.Link eventKey="country" className="px-3 py-1 fw-bold small">Country</Nav.Link>
-                                    </Nav.Item>
-                                    <Nav.Item>
-                                        <Nav.Link eventKey="state" className="ms-2 px-3 py-1 fw-bold small">State</Nav.Link>
-                                    </Nav.Item>
-                                    <Nav.Item>
-                                        <Nav.Link eventKey="city" className="ms-2 px-3 py-1 fw-bold small">City</Nav.Link>
-                                    </Nav.Item>
-                                </Nav>
-                            </Card.Header>
-                            <Card.Body className="p-0">
-                                <Tab.Content>
-                                    <Tab.Pane eventKey="country">
-                                        <GeoTable data={stats?.geoStats?.country} icon={FaFlag} title="Top Countries" color="primary" />
-                                    </Tab.Pane>
-                                    <Tab.Pane eventKey="state">
-                                        <GeoTable data={stats?.geoStats?.state} icon={FaMapMarkerAlt} title="Top States" color="danger" />
-                                    </Tab.Pane>
-                                    <Tab.Pane eventKey="city">
-                                        <GeoTable data={stats?.geoStats?.city} icon={FaCity} title="Top Cities" color="info" />
-                                    </Tab.Pane>
-                                </Tab.Content>
-                            </Card.Body>
-                        </Card>
-                    </Tab.Container>
-                </Col>
-            </Row>
-
             {/* Bottom Section: Users & Recent Orders */}
             <Row className="g-4">
                 <Col lg={4}>
-                    <Card className="border-0 shadow-sm h-100">
-                        <Card.Header className="bg-white py-3 border-bottom-0">
+                    <Card className="border-0 shadow-sm h-100 rounded-3">
+                        <Card.Header className="bg-white py-3 border-bottom">
                             <h5 className="fw-bold mb-0 text-dark">User Distribution</h5>
                         </Card.Header>
                         <Card.Body className="p-3">
                             <Row className="g-3">
                                 <Col xs={6}>
-                                    <Link to="/admins" className="text-decoration-none">
+                                    <Link to="/dashboard/super-admin/admins" className="text-decoration-none">
                                         <div className="p-3 border rounded-3 text-center bg-white hover-card transition-all h-100">
                                             <FaUserShield className="text-primary mb-2" size={28} />
                                             <div className="text-muted small fw-bold">Admins</div>
@@ -266,7 +190,7 @@ const SystemOverview = () => {
                                     </Link>
                                 </Col>
                                 <Col xs={6}>
-                                    <Link to="/managers" className="text-decoration-none">
+                                    <Link to="/dashboard/super-admin/managers" className="text-decoration-none">
                                         <div className="p-3 border rounded-3 text-center bg-white hover-card transition-all h-100">
                                             <FaUserTie className="text-success mb-2" size={28} />
                                             <div className="text-muted small fw-bold">Managers</div>
@@ -275,7 +199,7 @@ const SystemOverview = () => {
                                     </Link>
                                 </Col>
                                 <Col xs={6}>
-                                    <Link to="/providers" className="text-decoration-none">
+                                    <Link to="/dashboard/super-admin/providers" className="text-decoration-none">
                                         <div className="p-3 border rounded-3 text-center bg-white hover-card transition-all h-100">
                                             <FaStore className="text-info mb-2" size={28} />
                                             <div className="text-muted small fw-bold">Providers</div>
@@ -284,7 +208,7 @@ const SystemOverview = () => {
                                     </Link>
                                 </Col>
                                 <Col xs={6}>
-                                    <Link to="/customers" className="text-decoration-none">
+                                    <Link to="/dashboard/super-admin/customers" className="text-decoration-none">
                                         <div className="p-3 border rounded-3 text-center bg-white hover-card transition-all h-100">
                                             <FaUser className="text-warning mb-2" size={28} />
                                             <div className="text-muted small fw-bold">Customers</div>
@@ -298,51 +222,57 @@ const SystemOverview = () => {
                 </Col>
 
                 <Col lg={8}>
-                    <Card className="border-0 shadow-sm h-100">
-                        <Card.Header className="bg-white py-3 border-bottom-0 d-flex justify-content-between align-items-center">
+                    <Card className="border-0 shadow-sm h-100 rounded-3">
+                        <Card.Header className="bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
                             <h5 className="fw-bold mb-0 text-dark">Recent Orders</h5>
-                            <Button variant="light" size="sm" className="text-primary fw-bold">View All</Button>
+                            <Button variant="light" size="sm" className="text-primary fw-bold" as={Link} to="/dashboard/super-admin/orders">View All</Button>
                         </Card.Header>
                         <Card.Body className="p-0">
                             <div className="table-responsive">
                                 <Table hover className="align-middle mb-0 text-nowrap">
-                                    <thead className="bg-light text-muted text-uppercase small">
+                                    <thead className="bg-light">
                                         <tr>
-                                            <th className="border-0 ps-4">Order ID</th>
-                                            <th className="border-0">Customer</th>
-                                            <th className="border-0">Amount</th>
-                                            <th className="border-0">Status</th>
-                                            <th className="border-0">Date</th>
+                                            <th className="ps-4 py-3 text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-0">Order ID</th>
+                                            <th className="py-3 text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-0">Customer</th>
+                                            <th className="py-3 text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-0">Amount</th>
+                                            <th className="py-3 text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-0">Status</th>
+                                            <th className="py-3 text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-0">Date</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {stats?.recentOrders?.length > 0 ? (
                                             stats.recentOrders.map(order => (
                                                 <tr key={order._id}>
-                                                    <td className="ps-4 fw-medium text-dark">#{order._id.substring(0, 8)}</td>
-                                                    <td>
+                                                    <td className="ps-4 py-3">
+                                                        <span className="fw-bold text-dark text-sm">#{order._id.substring(0, 8)}</span>
+                                                    </td>
+                                                    <td className="py-3">
                                                         <div className="d-flex align-items-center">
                                                             <div className="rounded-circle bg-light d-flex align-items-center justify-content-center me-2" style={{ width: 30, height: 30 }}>
                                                                 <FaUser size={12} className="text-secondary" />
                                                             </div>
-                                                            {order.user?.name || 'Guest'}
+                                                            <span className="text-dark text-sm fw-bold">{order.user?.name || 'Guest'}</span>
                                                         </div>
                                                     </td>
-                                                    <td className="fw-bold">${order.totalPrice}</td>
-                                                    <td>
+                                                    <td className="py-3">
+                                                        <span className="fw-bold text-success text-sm">${order.totalPrice}</span>
+                                                    </td>
+                                                    <td className="py-3">
                                                         <Badge bg={
                                                             order.orderStatus === 'Delivered' ? 'success' :
                                                                 order.orderStatus === 'Processing' ? 'info' :
                                                                     order.orderStatus === 'Shipped' ? 'primary' : 'warning'
-                                                        } className="px-3 py-2 rounded-pill fw-normal">
+                                                        } className="px-3 py-2 rounded-pill fw-normal text-xs">
                                                             {order.orderStatus}
                                                         </Badge>
                                                     </td>
-                                                    <td className="text-muted">{new Date(order.createdAt).toLocaleDateString()}</td>
+                                                    <td className="py-3">
+                                                        <span className="text-secondary text-sm">{new Date(order.createdAt).toLocaleDateString()}</span>
+                                                    </td>
                                                 </tr>
                                             ))
                                         ) : (
-                                            <tr><td colSpan="5" className="text-center py-4 text-muted">No recent orders found</td></tr>
+                                            <tr><td colSpan="5" className="text-center py-4 text-muted small">No recent orders found</td></tr>
                                         )}
                                     </tbody>
                                 </Table>

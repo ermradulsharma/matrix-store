@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { Form, Button, Card, Spinner, Alert, Container, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { createCategory } from '../../../services/api';
-import { FaSave, FaArrowLeft, FaCloudUploadAlt } from 'react-icons/fa';
+import { FaSave, FaArrowLeft, FaCloudUploadAlt, FaTimes } from 'react-icons/fa';
 
 const CreateCategory = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
 
     const [formData, setFormData] = useState({
@@ -36,6 +37,7 @@ const CreateCategory = () => {
         e.preventDefault();
         setLoading(true);
         setError('');
+        setSuccess(null);
 
         if (!formData.image) {
             setError('Please select an image');
@@ -46,7 +48,8 @@ const CreateCategory = () => {
         try {
             const res = await createCategory(formData);
             if (res.success) {
-                navigate('..'); // Go back to list
+                setSuccess("Category created successfully!");
+                setTimeout(() => navigate(-1), 1500);
             }
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to create category');
@@ -56,22 +59,20 @@ const CreateCategory = () => {
     };
 
     return (
-        <Container fluid className="p-4">
-            <Button variant="light" className="mb-4 text-primary fw-bold" onClick={() => navigate('..')}>
-                <FaArrowLeft className="me-2" /> Back to Categories
-            </Button>
+        <Container fluid>
+            <Card className="border-0 rounded-3 shadow-sm">
+                <Card.Header className="d-flex justify-content-between align-items-center bg-white border-bottom">
+                    <h4 className="fw-bold text-dark mb-0">Create New Category</h4>
+                    <Button variant="danger" className='d-flex align-items-center gap-1 justify-content-center' onClick={() => navigate(-1)}><FaArrowLeft /> Back </Button>
+                </Card.Header>
+                <Card.Body className="p-4">
+                    {error && <Alert variant="danger">{error}</Alert>}
+                    {success && <Alert variant="success">{success}</Alert>}
 
-            <Row className="justify-content-center">
-                <Col md={8} lg={6}>
-                    <Card className="border-0 shadow-sm">
-                        <Card.Header className="bg-white py-3 border-bottom-0">
-                            <h4 className="fw-bold text-dark mb-0">Create New Category</h4>
-                        </Card.Header>
-                        <Card.Body className="p-4">
-                            {error && <Alert variant="danger">{error}</Alert>}
-
-                            <Form onSubmit={handleSubmit}>
-                                <Form.Group className="mb-3">
+                    <Form onSubmit={handleSubmit}>
+                        <Row>
+                            <Col md={12} className="mb-3">
+                                <Form.Group>
                                     <Form.Label>Category Title</Form.Label>
                                     <Form.Control
                                         type="text"
@@ -82,8 +83,10 @@ const CreateCategory = () => {
                                         placeholder="e.g. Electronics"
                                     />
                                 </Form.Group>
+                            </Col>
 
-                                <Form.Group className="mb-3">
+                            <Col md={12} className="mb-3">
+                                <Form.Group>
                                     <Form.Label>Description</Form.Label>
                                     <Form.Control
                                         as="textarea"
@@ -94,8 +97,10 @@ const CreateCategory = () => {
                                         placeholder="Optional description..."
                                     />
                                 </Form.Group>
+                            </Col>
 
-                                <Form.Group className="mb-4">
+                            <Col md={12} className="mb-4">
+                                <Form.Group>
                                     <Form.Label>Category Image</Form.Label>
                                     <div className="d-flex align-items-center">
                                         <div className="me-3 border rounded d-flex align-items-center justify-content-center bg-light"
@@ -118,17 +123,20 @@ const CreateCategory = () => {
                                         </div>
                                     </div>
                                 </Form.Group>
+                            </Col>
+                        </Row>
 
-                                <div className="d-grid">
-                                    <Button variant="primary" type="submit" disabled={loading} size="lg">
-                                        {loading ? <Spinner as="span" animation="border" size="sm" /> : <><FaSave className="me-2" /> Create Category</>}
-                                    </Button>
-                                </div>
-                            </Form>
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
+                        <div className="d-flex justify-content-end gap-2">
+                            <Button variant="secondary" className='d-flex align-items-center gap-1 justify-content-center' onClick={() => navigate(-1)}>
+                                <FaTimes className="me-1" /> Cancel
+                            </Button>
+                            <Button variant="primary" type="submit" className='d-flex align-items-center gap-1 justify-content-center' disabled={loading}>
+                                {loading ? <Spinner as="span" animation="border" size="sm" /> : <><FaSave className="me-2" /> Create Category</>}
+                            </Button>
+                        </div>
+                    </Form>
+                </Card.Body>
+            </Card>
         </Container>
     );
 };
