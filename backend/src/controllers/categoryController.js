@@ -1,21 +1,9 @@
-const ErrorHandler = require("../utils/errorHandler");
-const catchAsyncError = require("../middlewares/catchAsyncErrors");
-const Category = require("../models/Category");
-const { default: slugify } = require("slugify");
+const catchAsyncErrors = require("../middlewares/catchAsyncErrors");
+const categoryService = require("../services/categoryService");
 
-exports.createCategory = catchAsyncError(async (req, res, next) => {
-    const { title, description } = req.body;
-    if (!title) {
-        return next(new ErrorHandler("Category title is required", 400));
-    }
-
-    let image = "https://example.com/default-category.png";
-    if (req.file) {
-        image = `/uploads/${req.file.filename}`;
-    }
-
-    const slug = slugify(title, { lower: true, strict: true });
-    const category = await Category.create({ title, description, slug, image });
+// Create Category
+exports.createCategory = catchAsyncErrors(async (req, res, next) => {
+    const category = await categoryService.createCategory(req.body, req.file);
     res.status(201).json({
         success: true,
         message: "Category created successfully",
@@ -23,8 +11,9 @@ exports.createCategory = catchAsyncError(async (req, res, next) => {
     });
 });
 
-exports.getAllCategory = catchAsyncError(async (req, res, next) => {
-    const categories = await Category.find();
+// Get All Categories
+exports.getAllCategory = catchAsyncErrors(async (req, res, next) => {
+    const categories = await categoryService.getAllCategories();
     res.status(200).json({
         success: true,
         count: categories.length,
@@ -32,11 +21,9 @@ exports.getAllCategory = catchAsyncError(async (req, res, next) => {
     });
 });
 
-exports.getCategoryDetails = catchAsyncError(async (req, res, next) => {
-    const category = await Category.findById(req.params.id);
-    if (!category) {
-        return next(new ErrorHandler("Category Not Found", 404));
-    }
+// Get Category Details
+exports.getCategoryDetails = catchAsyncErrors(async (req, res, next) => {
+    const category = await categoryService.getCategoryById(req.params.id);
     res.status(200).json({
         success: true,
         category,
@@ -44,22 +31,9 @@ exports.getCategoryDetails = catchAsyncError(async (req, res, next) => {
     });
 });
 
-exports.updateCategory = catchAsyncError(async (req, res, next) => {
-    let category = await Category.findById(req.params.id);
-    if (!category) {
-        return next(new ErrorHandler("Category Not Found", 404));
-    }
-
-    // Update image if provided
-    if (req.file) {
-        req.body.image = `/uploads/${req.file.filename}`;
-    }
-
-    category = await Category.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-        runValidators: true,
-        useFindAndModify: false,
-    });
+// Update Category
+exports.updateCategory = catchAsyncErrors(async (req, res, next) => {
+    const category = await categoryService.updateCategory(req.params.id, req.body, req.file);
     res.status(200).json({
         success: true,
         category,
@@ -67,31 +41,21 @@ exports.updateCategory = catchAsyncError(async (req, res, next) => {
     });
 });
 
-exports.deleteCategory = catchAsyncError(async (req, res, next) => {
-    const category = await Category.findById(req.params.id);
-    if (!category) {
-        return next(new ErrorHandler("Category Not Found", 404));
-    }
-    await Category.deleteOne({ _id: req.params.id });
+// Delete Category
+exports.deleteCategory = catchAsyncErrors(async (req, res, next) => {
+    await categoryService.deleteCategory(req.params.id);
     res.status(200).json({
         success: true,
         message: "Category deleted successfully",
     });
 });
 
-exports.toggleCategoryStatus = catchAsyncError(async (req, res, next) => {
-    const category = await Category.findById(req.params.id);
-    if (!category) {
-        return next(new ErrorHandler("Category Not Found", 404));
-    }
-
-    const newStatus = category.status === 'active' ? 'inactive' : 'active';
-    category.status = newStatus;
-    await category.save();
-
+// Toggle Status
+exports.toggleCategoryStatus = catchAsyncErrors(async (req, res, next) => {
+    const category = await categoryService.toggleStatus(req.params.id);
     res.status(200).json({
         success: true,
-        message: `Category ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully`,
-        status: newStatus
+        message: `Category ${category.status === 'active' ? 'activated' : 'deactivated'} successfully`,
+        status: category.status
     });
 });

@@ -1,11 +1,10 @@
 const ErrorHandler = require('../utils/errorHandler');
-const errorHandler = require('../utils/errorHandler');
 
 module.exports = (err, req, res, next) => {
     err.statusCode = err.statusCode || 500;
     err.message = err.message || "Internal Server Error";
 
-    const response = {
+    let response = {
         success: false,
         message: err.message,
     };
@@ -14,6 +13,18 @@ module.exports = (err, req, res, next) => {
         return next(err); // Forward the error to the default error handler
     }
 
+    // Handle Mongoose Connection Error
+    if (
+        err.name === 'MongooseServerSelectionError' ||
+        err.name === 'MongoNetworkError' ||
+        (err.message && (err.message.includes('ECONNREFUSED') || err.message.includes('connection timed out') || err.message.includes('buffering timed out')))
+    ) {
+        response.message = "Database connection failed. Please ensure MongoDB is running.";
+        err.statusCode = 503; // Service Unavailable
+    }
+
+    // Add error name for debugging
+    response.errorName = err.name;
 
     if (err.name === "ValidationError") {
         // Handle validation errors
@@ -92,5 +103,10 @@ module.exports = (err, req, res, next) => {
         response.message = `This token is expired. Please Try Again`;
         res.status(404).json(response); // Use 404 status for not found errors
 
+    }
+
+    // Final Response
+    if (!res.headersSent) {
+        return res.status(err.statusCode).json(response);
     }
 };

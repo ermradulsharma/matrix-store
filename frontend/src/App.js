@@ -19,6 +19,7 @@ import Shop from "./pages/frontend/Shop";
 import Cart from "./pages/frontend/Cart";
 import Wishlist from "./pages/frontend/Wishlist";
 import Checkout from "./pages/frontend/Checkout";
+import Payment from "./pages/frontend/Payment"; // Import Payment
 import OrderSuccess from "./pages/frontend/OrderSuccess";
 import Login from "./pages/frontend/Login";
 import Register from "./pages/frontend/Register";
@@ -95,6 +96,7 @@ function App() {
                                         <Route path="/cart" element={<Cart />} />
                                         <Route path="/wishlist" element={<Wishlist />} />
                                         <Route path="/checkout" element={<Checkout />} />
+                                        <Route path="/payment" element={<Payment />} />
                                         <Route path="/order-success" element={<OrderSuccess />} />
                                         <Route path="/login" element={<Login />} />
                                         <Route path="/register" element={<Register />} />

@@ -68,7 +68,7 @@ export const loginUser = async (email, password) => {
  * @param {string} mobile
  */
 export const sendOtp = async (mobile) => {
-  console.log(`Sending OTP to ${mobile}...`);
+
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({ success: true, message: "OTP sent successfully" });
@@ -82,7 +82,7 @@ export const sendOtp = async (mobile) => {
  * @param {string} otp
  */
 export const verifyOtp = async (mobile, otp) => {
-  console.log(`Verifying OTP ${otp} for ${mobile}...`);
+
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       if (otp === "1234") {
@@ -495,6 +495,37 @@ export const markNotificationRead = (id) => api.put(`/notifications/${id}/read`)
 export const markAllNotificationsRead = () => api.put("/notifications/read-all");
 
 export const searchGlobal = (query) => api.get(`/admin/global-search?q=${query}`);
+
+// ============= PAYMENT =============
+export const getRazorpayKey = async () => {
+  try {
+    const res = await api.get("/razorpaykey");
+    return res.data.key;
+  } catch (error) {
+    console.error("Error fetching Razorpay key:", error);
+    throw error;
+  }
+};
+
+export const createRazorpayOrder = async (amount) => {
+  try {
+    const res = await api.post("/payment/process", { amount });
+    return res.data.order;
+  } catch (error) {
+    console.error("Error creating Razorpay order:", error);
+    throw error;
+  }
+};
+
+export const verifyRazorpayPayment = async (paymentData) => {
+  try {
+    const res = await api.post("/payment/verify", paymentData);
+    return res.data;
+  } catch (error) {
+    console.error("Error verifying payment:", error);
+    throw error;
+  }
+};
 
 export default api;
 

@@ -159,7 +159,7 @@ const DashboardHeader = ({ toggleSidebar, collapsed }) => {
                             <div className="p-2">
                                 <h6 className="px-3 py-1 text-muted small fw-bold text-uppercase border-bottom">Orders</h6>
                                 {searchResults.orders.map(o => (
-                                    <div key={o._id} className="d-flex align-items-center p-2 hover-bg-light cursor-pointer rounded-2" onClick={() => console.log('Order Details not implemented yet')}>
+                                    <div key={o._id} className="d-flex align-items-center p-2 hover-bg-light cursor-pointer rounded-2" onClick={() => { }}>
                                         <div className="me-2">
                                             <span className={`badge bg-${o.orderStatus === 'Delivered' ? 'success' : 'warning'} rounded-pill`} style={{ fontSize: '0.6rem' }}>{o.orderStatus}</span>
                                         </div>

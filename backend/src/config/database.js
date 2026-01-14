@@ -6,6 +6,8 @@ const connectDatabase = () => {
         // useUnifiedTopology: true
     }).then(() => {
         console.log(`Connected to MongoDB: ${mongoose.connection.host}`);
+    }).catch((err) => {
+        console.error(`Error connecting to MongoDB: ${err.message}`);
     });
 }
 

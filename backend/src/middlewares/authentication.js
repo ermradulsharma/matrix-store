@@ -5,8 +5,14 @@ const User = require("../models/User");
 const Role = require("../models/Role"); // Import Role model
 
 exports.isauthenticate = catchAsyncError(async (req, res, next) => {
-    const { token } = req.cookies;
-    // console.log(token);
+    let token;
+
+    if (req.cookies.token) {
+        token = req.cookies.token;
+    } else if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+        token = req.headers.authorization.split(" ")[1];
+    }
+
     if (!token) {
         return next(new ErrorHandler("Please Register or Login First", 401));
     }

@@ -14,6 +14,18 @@ const {
 
 const upload = require("../middlewares/upload");
 
+// Health Check
+router.get("/health", async (req, res) => {
+  const mongoose = require('mongoose');
+  const dbStatus = mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected';
+  res.status(200).json({
+    success: true,
+    server: "Running",
+    database: dbStatus,
+    timestamp: new Date()
+  });
+});
+
 // User Routes
 router.post("/register", upload.single('image'), userController.userRegistration);
 router.post("/login", userController.loginUser);
@@ -407,5 +419,16 @@ router.post("/cart/sync", isauthenticate, cartController.syncCart);
 router.post("/cart/add", isauthenticate, cartController.addToCart);
 router.delete("/cart/remove/:productId", isauthenticate, cartController.removeFromCart);
 router.put("/cart/update", isauthenticate, cartController.updateCartItem);
+
+// Payment Routes
+const {
+  processPayment,
+  sendRazorpayKey,
+  paymentVerification,
+} = require("../controllers/paymentController");
+
+router.route("/payment/process").post(isauthenticate, processPayment);
+router.route("/payment/verify").post(isauthenticate, paymentVerification);
+router.route("/razorpaykey").get(isauthenticate, sendRazorpayKey);
 
 module.exports = router;

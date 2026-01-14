@@ -3,12 +3,12 @@ import { Container, Row, Col, Card, Form, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../../context/CartContext';
 import { AuthContext } from '../../context/AuthContext';
-import { submitOrder } from '../../services/api';
+// submitOrder removed
 import { toast } from 'react-toastify';
 import '../../styles/pages/Checkout.css';
 
 const Checkout = () => {
-    const { cartItems, cartTotal, clearCart } = useContext(CartContext);
+    const { cartItems, cartTotal } = useContext(CartContext);
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
 
@@ -17,10 +17,10 @@ const Checkout = () => {
         email: user?.email || '',
         address: '',
         city: '',
+        state: '',
+        country: '',
         zipCode: '',
-        cardNumber: '',
-        cardExpiry: '',
-        cardCVV: '',
+        phoneNo: '', // Added new fields to match handleSubmit usage
     });
 
     const [loading, setLoading] = useState(false);
@@ -31,35 +31,45 @@ const Checkout = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
 
         // Basic validation
         if (!formData.fullName || !formData.email || !formData.address || !formData.city) {
             toast.error('Please fill in all required fields');
+            setLoading(false);
             return;
         }
 
-        setLoading(true);
-        try {
-            // Submit order to dummy API
-            const orderData = {
-                title: 'New Order',
-                body: JSON.stringify({
-                    user: formData,
-                    items: cartItems,
-                    total: cartTotal,
-                }),
-                userId: user?.id || 1,
-            };
+        // Calculate totals
+        const itemsPrice = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+        const shippingPrice = itemsPrice > 100 ? 0 : 10; // Simple logic
+        const taxPrice = itemsPrice * 0.05; // 5% tax
+        const totalPrice = itemsPrice + shippingPrice + taxPrice;
 
-            const response = await submitOrder(orderData);
-            clearCart();
-            toast.success("Order Placed Successfully!");
-            navigate('/order-success', { state: { orderId: response.id, orderData } });
-        } catch (err) {
-            toast.error('Failed to place order. Please try again.');
-        } finally {
-            setLoading(false);
-        }
+        const orderInfo = {
+            shippingInfo: {
+                address: formData.address,
+                city: formData.city,
+                state: formData.state || 'State', // Add state if missing
+                country: formData.country || 'India',
+                pinCode: formData.zipCode,
+                phoneNo: formData.phoneNo || '9999999999',
+            },
+            cartItems: cartItems.map(item => ({
+                product: item.product._id, // Ensure product ID is preserved
+                name: item.title,
+                price: item.price,
+                image: item.image,
+                quantity: item.quantity,
+            })),
+            itemsPrice,
+            taxPrice,
+            shippingPrice,
+            totalPrice,
+        };
+
+        sessionStorage.setItem("orderInfo", JSON.stringify(orderInfo));
+        navigate("/payment");
     };
 
     if (cartItems.length === 0) {
@@ -144,49 +154,9 @@ const Checkout = () => {
                                     </Col>
                                 </Row>
 
-                                <h4 className="mt-4">Payment Information (Demo)</h4>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Card Number</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        name="cardNumber"
-                                        placeholder="1234 5678 9012 3456"
-                                        value={formData.cardNumber}
-                                        onChange={handleChange}
-                                    />
-                                    <Form.Text className="text-muted">
-                                        Demo only - any number works
-                                    </Form.Text>
-                                </Form.Group>
-                                <Row>
-                                    <Col md={6}>
-                                        <Form.Group className="mb-3">
-                                            <Form.Label>Expiry Date</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name="cardExpiry"
-                                                placeholder="MM/YY"
-                                                value={formData.cardExpiry}
-                                                onChange={handleChange}
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                    <Col md={6}>
-                                        <Form.Group className="mb-3">
-                                            <Form.Label>CVV</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name="cardCVV"
-                                                placeholder="123"
-                                                value={formData.cardCVV}
-                                                onChange={handleChange}
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-
+                                {/* Payment Information Removed - Handled in Payment Page */}
                                 <Button variant="primary" type="submit" className="w-100 mt-3" disabled={loading}>
-                                    {loading ? 'Processing...' : 'Place Order'}
+                                    Proceed to Payment
                                 </Button>
                             </Form>
                         </Card.Body>

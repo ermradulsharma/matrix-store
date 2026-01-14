@@ -1,11 +1,9 @@
-const Role = require('../models/Role');
-const ErrorHandler = require('../utils/errorHandler');
 const catchAsyncErrors = require('../middlewares/catchAsyncErrors');
+const roleService = require('../services/roleService');
 
 // Get all roles with permissions
 exports.getAllRoles = catchAsyncErrors(async (req, res, next) => {
-    const roles = await Role.find();
-
+    const roles = await roleService.getAllRoles();
     res.status(200).json({
         success: true,
         roles
@@ -14,23 +12,7 @@ exports.getAllRoles = catchAsyncErrors(async (req, res, next) => {
 
 // Update permissions for a specific role
 exports.updateRolePermissions = catchAsyncErrors(async (req, res, next) => {
-    const { id } = req.params;
-    const { permissions } = req.body;
-
-    if (!permissions || !Array.isArray(permissions)) {
-        return next(new ErrorHandler('Permissions must be an array', 400));
-    }
-
-    const role = await Role.findById(id);
-
-    if (!role) {
-        return next(new ErrorHandler('Role not found', 404));
-    }
-
-    // Update permissions
-    role.permissions = permissions;
-    await role.save();
-
+    const role = await roleService.updatePermissions(req.params.id, req.body.permissions);
     res.status(200).json({
         success: true,
         message: 'Role permissions updated successfully',
@@ -38,40 +20,21 @@ exports.updateRolePermissions = catchAsyncErrors(async (req, res, next) => {
     });
 });
 
-// Admin can create a new custom role (Optional, but good for future)
+// Admin can create a new custom role
 exports.createRole = catchAsyncErrors(async (req, res, next) => {
-    const { name, description, permissions } = req.body;
-
-    const role = await Role.create({
-        name,
-        description,
-        permissions,
-        type: 'admin' // defaulting to admin type for custom roles for now
-    });
-
+    const role = await roleService.createRole(req.body);
     res.status(201).json({
         success: true,
         role
     });
 });
 
+// Delete role
 exports.deleteRole = catchAsyncErrors(async (req, res, next) => {
-    const role = await Role.findById(req.params.id);
-
-    if (!role) {
-        return next(new ErrorHandler("Role not found", 404));
-    }
-
-    // Prevent deleting core system roles
-    const systemRoles = ['super_admin', 'admin', 'manager', 'provider', 'user', 'customer'];
-    if (systemRoles.includes(role.name)) {
-        return next(new ErrorHandler("Cannot delete system roles", 400));
-    }
-
-    await role.deleteOne();
-
+    await roleService.deleteRole(req.params.id);
     res.status(200).json({
         success: true,
         message: "Role Deleted Successfully",
     });
 });
+
