@@ -123,7 +123,7 @@ const DashboardHeader = ({ toggleSidebar, collapsed }) => {
                                     }}>
                                         <div className="rounded-circle bg-light d-flex align-items-center justify-content-center me-2" style={{ width: 30, height: 30 }}>
                                             {u.image?.url && u.image.url !== 'default_url' ?
-                                                <img src={u.image.url} alt={u.first_name} className="w-100 h-100 rounded-circle object-fit-cover" /> :
+                                                <img src={u.image.url.startsWith('http') ? u.image.url : `http://localhost:5000${u.image.url}`} alt={u.first_name} className="w-100 h-100 rounded-circle object-fit-cover" /> :
                                                 <span className="fw-bold small">{u.first_name.charAt(0)}</span>
                                             }
                                         </div>
@@ -251,7 +251,7 @@ const DashboardHeader = ({ toggleSidebar, collapsed }) => {
                             <div className="position-relative">
                                 <div className="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center shadow-sm" style={{ width: '45px', height: '45px', border: '2px solid #fff' }}>
                                     {user?.image?.url && user.image.url !== "https://example.com/default-avatar.png" && user.image.url !== "default_url" ? (
-                                        <img src={user.image.url} alt={user.name} className="rounded-circle w-100 h-100 object-fit-cover" />
+                                        <img src={user.image.url.startsWith('http') ? user.image.url : `http://localhost:5000${user.image.url}`} alt={user.name} className="rounded-circle w-100 h-100 object-fit-cover" />
                                     ) : (
                                         <span className="fw-bold fs-5">{user?.first_name?.charAt(0) || <FaUser />}</span>
                                     )}

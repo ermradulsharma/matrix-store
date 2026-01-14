@@ -93,8 +93,16 @@ const ProviderList = () => {
                                     <tr key={provider._id}>
                                         <td className="ps-4 py-3">
                                             <div className="d-flex align-items-center">
-                                                <div className="avatar rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-3" style={{ width: '40px', height: '40px', fontWeight: 'bold' }}>
-                                                    {provider.companyName.charAt(0).toUpperCase()}
+                                                <div className="avatar rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-3 overflow-hidden" style={{ width: '40px', height: '40px', fontWeight: 'bold' }}>
+                                                    {provider.user?.image?.url && provider.user.image.url !== 'default_url' ? (
+                                                        <img
+                                                            src={provider.user.image.url.startsWith('http') ? provider.user.image.url : `http://localhost:5000${provider.user.image.url}`}
+                                                            alt={provider.companyName}
+                                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                        />
+                                                    ) : (
+                                                        provider.companyName.charAt(0).toUpperCase()
+                                                    )}
                                                 </div>
                                                 <h6 className="mb-0 fw-bold text-dark">{provider.companyName}</h6>
                                             </div>

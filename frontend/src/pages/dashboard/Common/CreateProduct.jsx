@@ -83,7 +83,11 @@ const CreateProduct = () => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 const newImages = [...formData.images];
-                newImages[index].url = reader.result;
+                newImages[index] = {
+                    ...newImages[index],
+                    url: reader.result, // for preview
+                    file: file // for upload
+                };
                 setFormData({ ...formData, images: newImages });
             };
             reader.readAsDataURL(file);
@@ -108,19 +112,46 @@ const CreateProduct = () => {
         e.preventDefault();
         setLoading(true);
 
-        // Filter out empty images
-        const validImages = formData.images.filter(img => img.url.trim() !== '');
+        const myForm = new FormData();
+        myForm.set("name", formData.name);
+        myForm.set("price", formData.price);
+        myForm.set("stock", formData.stock);
+        myForm.set("category", formData.category);
+        myForm.set("description", formData.description);
+        myForm.set("brand", formData.brand);
+        myForm.set("model", formData.model);
+        myForm.set("weight", formData.weight);
+        myForm.set("status", formData.status);
+        myForm.set("approvalStatus", formData.approvalStatus);
+        myForm.set("sku", formData.sku);
+        myForm.set("barcode", formData.barcode);
+        myForm.set("location", formData.location);
 
-        const payload = {
-            ...formData,
-            images: validImages.length > 0 ? validImages : [{
-                public_id: 'placeholder',
-                url: 'https://via.placeholder.com/300?text=No+Image'
-            }]
-        };
+        // Stringify nested objects
+        myForm.set("dimensions", JSON.stringify(formData.dimensions));
+        myForm.set("stockLimits", JSON.stringify(formData.stockLimits));
+        myForm.set("supplier", JSON.stringify(formData.supplier));
+
+        // Append images
+        // We need to differentiate between existing URL images (not possible to re-upload via File object)
+        // and NEW File objects.
+        // For Create Product, typically all are new Files eventually.
+        // But our `images` state holds objects with `url`. 
+        // We need to store the actual FILE object in the state to send it.
+        // The current `handleImageChange` stores `url` (base64) for preview, but we can store `file` too.
+        // Refactoring handleImageChange to store File object is needed, or we rely on the input ref?
+        // Better to store File in state.
+
+        // Assuming we updated handleImageChange to store file:
+        // Let's iterate formData.images and append real files.
+        formData.images.forEach((img) => {
+            if (img.file) {
+                myForm.append("images", img.file);
+            }
+        });
 
         try {
-            const res = await createProduct(payload);
+            const res = await createProduct(myForm);
             if (res.success) {
                 toast.success("Product created successfully!");
                 setTimeout(() => navigate(getDashboardPrefix()), 1500);

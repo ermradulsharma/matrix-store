@@ -27,7 +27,7 @@ const CreateCategory = () => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImagePreview(reader.result);
-                setFormData({ ...formData, image: reader.result });
+                setFormData({ ...formData, image: file }); // Store file object for upload
             };
             reader.readAsDataURL(file);
         }
@@ -37,14 +37,19 @@ const CreateCategory = () => {
         e.preventDefault();
         setLoading(true);
 
-        if (!formData.image) {
+        const myForm = new FormData();
+        myForm.set("title", formData.title);
+        myForm.set("description", formData.description);
+        if (formData.image instanceof File) {
+            myForm.set("image", formData.image);
+        } else if (!formData.image) {
             toast.error('Please select an image');
             setLoading(false);
             return;
         }
 
         try {
-            const res = await createCategory(formData);
+            const res = await createCategory(myForm);
             if (res.success) {
                 toast.success("Category created successfully!");
                 setTimeout(() => navigate(-1), 1500);

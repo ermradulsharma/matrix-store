@@ -74,8 +74,16 @@ const ManagerList = () => {
                                     <tr key={manager._id}>
                                         <td className="ps-4 py-3">
                                             <div className="d-flex align-items-center">
-                                                <div className="avatar rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-3" style={{ width: '40px', height: '40px', fontWeight: 'bold' }}>
-                                                    {manager.first_name.charAt(0)}
+                                                <div className="avatar rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-3 overflow-hidden" style={{ width: '40px', height: '40px', fontWeight: 'bold' }}>
+                                                    {manager.image && manager.image.url && manager.image.url !== 'default_url' ? (
+                                                        <img
+                                                            src={manager.image.url.startsWith('http') ? manager.image.url : `http://localhost:5000${manager.image.url}`}
+                                                            alt={manager.first_name}
+                                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                        />
+                                                    ) : (
+                                                        manager.first_name.charAt(0)
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <h6 className="mb-0 fw-bold text-dark">{manager.first_name} {manager.last_name}</h6>

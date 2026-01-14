@@ -9,7 +9,8 @@ import {
     FaFileInvoiceDollar,
     FaClipboardList,
     FaBuilding,
-    FaChartLine
+    FaChartLine,
+    FaUserLock
 } from 'react-icons/fa';
 
 const Sidebar = ({ collapsed }) => {
@@ -61,6 +62,11 @@ const Sidebar = ({ collapsed }) => {
                         <Nav.Item>
                             <Link to="/customers" className={`nav-link ${isActive('/customers') ? 'active' : ''}`}>
                                 <FaUsers className="me-2" /> Customers
+                            </Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Link to="/roles" className={`nav-link ${isActive('/roles') ? 'active' : ''}`}>
+                                <FaUserLock className="me-2" /> Permissions
                             </Link>
                         </Nav.Item>
                     </>

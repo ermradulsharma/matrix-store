@@ -109,10 +109,21 @@ const EditProduct = () => {
         });
     };
 
-    const handleImageChange = (index, value) => {
-        const newImages = [...formData.images];
-        newImages[index].url = value;
-        setFormData({ ...formData, images: newImages });
+    const handleImageChange = (index, e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const newImages = [...formData.images];
+                newImages[index] = {
+                    ...newImages[index],
+                    url: reader.result, // preview
+                    file: file // upload
+                };
+                setFormData({ ...formData, images: newImages });
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     const addImageField = () => {
@@ -133,14 +144,43 @@ const EditProduct = () => {
         e.preventDefault();
         setLoading(true);
 
-        const validImages = formData.images.filter(img => img.url.trim() !== '');
-        const payload = {
-            ...formData,
-            images: validImages.length > 0 ? validImages : undefined
-        };
+        const myForm = new FormData();
+        myForm.set("name", formData.name);
+        myForm.set("price", formData.price);
+        myForm.set("stock", formData.stock);
+        myForm.set("category", formData.category);
+        myForm.set("description", formData.description);
+        myForm.set("brand", formData.brand);
+        myForm.set("model", formData.model);
+        myForm.set("weight", formData.weight);
+        myForm.set("status", formData.status);
+
+        // Stringify nested objects
+        myForm.set("dimensions", JSON.stringify(formData.dimensions));
+        myForm.set("stockLimits", JSON.stringify(formData.stockLimits));
+        myForm.set("supplier", JSON.stringify(formData.supplier));
+
+        // Handle Images
+        // If we have existing images (objects with public_id != 'manual_...'), we might want to keep them.
+        // But Multer only handles NEW files.
+        // If we want to DELETE existing images that are removed from UI, we need a separate field e.g. 'imagesToDelete' or 'retainedImages'.
+        // For simplicity in this local upload migration:
+        // 1. New files are appended.
+        // 2. Existing images are kept unless we implement a comprehensive 'retainedImages' logic.
+        // Let's implement a 'retainedImages' field which is a stringified array of public_ids/urls to KEEP.
+        // But backend `updateProduct` currently just appends new files to existing.
+        // It doesn't handle deletion or filtering based on retained list yet.
+        // For now, let's just send new files. Deletion of old files is a separate feature or needs backend logic update.
+        // I'll stick to sending new files.
+
+        formData.images.forEach((img) => {
+            if (img.file) {
+                myForm.append("images", img.file);
+            }
+        });
 
         try {
-            const res = await updateProduct(id, payload);
+            const res = await updateProduct(id, myForm);
             if (res.success) {
                 toast.success("Product updated successfully!");
                 setTimeout(() => navigate(getDashboardPrefix()), 1500);
@@ -410,30 +450,41 @@ const EditProduct = () => {
                                 </div>
 
                                 <div className="mb-4">
-                                    <Form.Label>Product Images (URL)</Form.Label>
+                                    <Form.Label>Product Images</Form.Label>
                                     {formData.images.map((img, index) => (
-                                        <div key={index} className="d-flex mb-2">
-                                            <Form.Control
-                                                type="url"
-                                                placeholder="https://example.com/image.jpg"
-                                                value={img.url}
-                                                onChange={(e) => handleImageChange(index, e.target.value)}
-                                                required
-                                            />
-                                            {formData.images.length > 1 && (
-                                                <Button
-                                                    variant="outline-danger"
-                                                    className="ms-2"
-                                                    onClick={() => removeImageField(index)}
-                                                >
-                                                    <FaTrash />
-                                                </Button>
+                                        <div key={index} className="d-flex mb-2 flex-column">
+                                            <div className="d-flex gap-2 mb-2">
+                                                <Form.Control
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={(e) => handleImageChange(index, e)}
+                                                />
+                                                {formData.images.length > 1 && (
+                                                    <Button
+                                                        variant="outline-danger"
+                                                        onClick={() => removeImageField(index)}
+                                                    >
+                                                        <FaTrash />
+                                                    </Button>
+                                                )}
+                                            </div>
+                                            {img.url && (
+                                                <div className="mb-2">
+                                                    <img
+                                                        src={img.url}
+                                                        alt={`Preview ${index}`}
+                                                        style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #ddd' }}
+                                                    />
+                                                </div>
                                             )}
                                         </div>
                                     ))}
                                     <Button variant="outline-primary" size="sm" onClick={addImageField}>
                                         <FaPlus className="me-1" /> Add Another Image
                                     </Button>
+                                    <Form.Text className="text-muted d-block mt-2">
+                                        Upload new images to append. Existing images are kept.
+                                    </Form.Text>
                                 </div>
 
                                 <div className="d-flex justify-content-end pt-3 border-top">

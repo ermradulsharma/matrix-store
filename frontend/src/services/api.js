@@ -1,19 +1,27 @@
 import axios from "axios";
 
-// Base URL for backend API (using proxy configured in package.json)
-// Base URL for backend API
-// Base URL for backend API
 const API_BASE = "http://localhost:5000/api/v1";
 
 // Create axios instance for backend API
+// Axios automatically sets Content-Type to multipart/form-data when body is FormData
+// No generic change needed here as long as we pass FormData object to the functions.
+// However, ensure headers are not forced to application/json globally if we need multipart.
+// Checking interceptors...
 const api = axios.create({
   baseURL: API_BASE,
-  withCredentials: true, // Important for cookie-based auth
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 // Add request interceptor to include auth token
 api.interceptors.request.use(
   (config) => {
+    // If data is FormData, let browser set Content-Type
+    if (config.data instanceof FormData) {
+      delete config.headers["Content-Type"];
+    }
     const token = localStorage.getItem("authToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -489,3 +497,16 @@ export const markAllNotificationsRead = () => api.put("/notifications/read-all")
 export const searchGlobal = (query) => api.get(`/admin/global-search?q=${query}`);
 
 export default api;
+
+// ============= ROLE MANAGEMENT =============
+export const fetchRoles = async () => {
+  return await api.get("/admin/roles");
+};
+
+export const updateRolePermissions = async (id, permissions) => {
+  return await api.put(`/admin/role/${id}/permissions`, { permissions });
+};
+
+export const updateUserPermissions = async (userId, permissions) => {
+  return await api.put(`/admin/user/${userId}/permissions`, { permissions });
+};

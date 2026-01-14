@@ -70,6 +70,7 @@ import UpdateProfile from "./pages/dashboard/Common/UpdateProfile";
 import Settings from "./pages/dashboard/Common/Settings";
 import CreateProduct from "./pages/dashboard/Common/CreateProduct";
 import EditProduct from "./pages/dashboard/Common/EditProduct";
+import RolePermissions from "./pages/dashboard/SuperAdmin/RolePermissions";
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -143,6 +144,7 @@ function App() {
                                 <Route element={<ProtectedRoute allowedRoles={["super_admin"]} />} >
                                     <Route element={<DashboardLayout />}>
                                         <Route path="/reports" element={<Reports />} />
+                                        <Route path="/roles" element={<RolePermissions />} />
                                     </Route>
                                 </Route>
 

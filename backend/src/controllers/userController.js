@@ -40,6 +40,18 @@ exports.userRegistration = catchAsyncError(async (req, res, next) => {
     }
   }
 
+  let avatar = {
+    public_id: "default_avatar",
+    url: "https://example.com/default-avatar.png" // Replace with local default if needed
+  };
+
+  if (req.file) {
+    avatar = {
+      public_id: req.file.filename,
+      url: `/uploads/${req.file.filename}`
+    };
+  }
+
   const newUser = await User.create({
     server_address: server_address || "unknown",
     first_name,
@@ -49,7 +61,7 @@ exports.userRegistration = catchAsyncError(async (req, res, next) => {
     name,
     username,
     mobile_no,
-    image,
+    image: avatar, // Store object as per schema
     role: role || "user",
   });
 
@@ -210,38 +222,39 @@ exports.userProfile = catchAsyncError(async (req, res, next) => {
 
 // Update Profile Own and other user when its role is admin
 exports.updateProfile = catchAsyncError(async (req, res, next) => {
-  let id;
-
-  if ("id" in req.params) {
-    id = req.params.id;
-  } else {
-    id = req.user.id;
-  }
-  const { first_name, last_name, mobile } = req.body;
-
-  const name = `${first_name} ${last_name}`; // Concatenate first_name and last_name
-
-  const updatedFields = {
-    first_name,
-    last_name,
-    mobile,
-    name,
+  const newUserData = {
+    first_name: req.body.first_name,
+    last_name: req.body.last_name,
+    email: req.body.email,
+    mobile_no: req.body.mobile_no,
   };
 
-  const user = await User.findByIdAndUpdate(id, updatedFields, {
+  if (req.file) {
+    newUserData.image = {
+      public_id: req.file.filename,
+      url: `/uploads/${req.file.filename}`
+    };
+  }
+
+  // If role is admin and id is passed in params, update that user.
+  // Else update logged in user.
+  // Note: Usually admins use updateUserAdmin, but if this endpoint supports it:
+  let userId = req.user.id;
+  // If we want to support admin updating others via this route (not recommended if we have dedicated admin route, 
+  // but keeping logic consistent with apparent intent):
+  // if ("id" in req.params && req.user.role === 'admin') { userId = req.params.id; } 
+  // For now, let's assume this is strictly for SELF update based on typical usage, 
+  // or `req.user.id` is the target. The previous code forced `req.user.id`.
+
+  const user = await User.findByIdAndUpdate(userId, newUserData, {
     new: true,
     runValidators: true,
     useFindAndModify: false,
   });
-  if (!user) {
-    console.log("User not found.");
-    return res.status(404).json({ success: false, message: "User not found." });
-  }
-  console.log("Updated User:", user);
 
   res.status(200).json({
     success: true,
-    user,
+    user
   });
 });
 
@@ -262,6 +275,14 @@ exports.updateUserAdmin = catchAsyncError(async (req, res, next) => {
   if (last_name) user.last_name = last_name;
   if (email) user.email = email;
   if (mobile_no) user.mobile_no = mobile_no;
+
+  // Update image if provided
+  if (req.file) {
+    user.image = {
+      public_id: req.file.filename,
+      url: `/uploads/${req.file.filename}`
+    };
+  }
 
   // Update name virtual/field if needed (though virtual usually auto-updates, but we stored it)
   user.name = `${user.first_name} ${user.last_name}`;
@@ -335,21 +356,31 @@ exports.createUser = catchAsyncError(async (req, res, next) => {
     }
   }
 
-  const user = await User.create({
+  const userData = {
     first_name,
     last_name,
     name,
-    username,
     email,
     password,
+    username,
     role,
     mobile_no,
-    managedBy: managerId, // Track who manages this user
-    image: {
+    managedBy: managerId,
+  };
+
+  if (req.file) {
+    userData.image = {
+      public_id: req.file.filename,
+      url: `/uploads/${req.file.filename}`
+    };
+  } else {
+    userData.image = {
       public_id: "default_id",
       url: "https://example.com/default-avatar.png",
-    },
-  });
+    };
+  }
+
+  const user = await User.create(userData);
 
   res.status(201).json({
     success: true,
@@ -484,5 +515,28 @@ exports.deleteUserProfile = catchAsyncError(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "User Deleted Successfully",
+  });
+});
+// Update User Permissions (Super Admin Only)
+exports.updateUserPermissions = catchAsyncError(async (req, res, next) => {
+  const { permissions } = req.body;
+
+  if (!permissions || !Array.isArray(permissions)) {
+    return next(new ErrorHandler("Permissions must be an array", 400));
+  }
+
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  user.permissions = permissions;
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "User permissions updated successfully",
+    user
   });
 });

@@ -28,7 +28,8 @@ const EditAdmin = () => {
                 last_name: user.last_name || '',
                 email: user.email || '',
                 mobile_no: user.mobile_no || '',
-                password: '' // Don't pre-fill password
+                password: '', // Don't pre-fill password
+                imagePreview: user.image?.url || ''
             });
         } catch (err) {
             toast.error("Failed to load admin details");
@@ -45,12 +46,31 @@ const EditAdmin = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFormData({ ...formData, image: file, imagePreview: reader.result });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setUpdating(true);
 
+        const myForm = new FormData();
+        myForm.set("first_name", formData.first_name);
+        myForm.set("last_name", formData.last_name);
+        myForm.set("email", formData.email);
+        myForm.set("mobile_no", formData.mobile_no);
+        if (formData.password) myForm.set("password", formData.password);
+        if (formData.image) myForm.set("image", formData.image);
+
         try {
-            const res = await updateUserAdmin(id, formData);
+            const res = await updateUserAdmin(id, myForm);
             if (res.data.success) {
                 toast.success("Admin details updated successfully!");
                 setTimeout(() => navigate(-1), 1500);
@@ -126,6 +146,25 @@ const EditAdmin = () => {
                                     />
                                 </Form.Group>
                             </Col>
+                            <Col md={12} className="mb-3">
+                                <Form.Label>Profile Image</Form.Label>
+                                <div className="d-flex align-items-center gap-3">
+                                    {formData.imagePreview && (
+                                        <img
+                                            src={formData.imagePreview}
+                                            alt="Preview"
+                                            style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '50%' }}
+                                        />
+                                    )}
+                                    <Form.Control
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageChange}
+                                    />
+                                </div>
+                                <Form.Text className="text-muted">Leave empty to keep existing image</Form.Text>
+                            </Col>
+
                             <Col md={12} className="mb-3">
                                 <Form.Group>
                                     <Form.Label>New Password <small className="text-muted">(Leave blank to keep unchanged)</small></Form.Label>

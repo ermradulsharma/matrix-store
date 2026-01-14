@@ -13,6 +13,10 @@ app.use(
   })
 );
 
+// Serve static files from uploads directory
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 const webRoutes = require("./routes/web");
 app.use("/api/v1", webRoutes);
 app.use(errorMiddleware);

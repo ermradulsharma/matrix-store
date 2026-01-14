@@ -22,12 +22,33 @@ const CreateManager = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFormData({ ...formData, image: file, imagePreview: reader.result });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
 
+        const myForm = new FormData();
+        myForm.set("first_name", formData.first_name);
+        myForm.set("last_name", formData.last_name);
+        myForm.set("email", formData.email);
+        myForm.set("password", formData.password);
+        myForm.set("mobile_no", formData.mobile_no);
+        myForm.set("role", formData.role);
+        if (formData.image) myForm.set("image", formData.image);
+
+
         try {
-            const res = await createUser(formData);
+            const res = await createUser(myForm);
             if (res.data.success) {
                 toast.success("Manager created successfully!");
                 setTimeout(() => navigate(-1), 1500);
@@ -97,6 +118,23 @@ const CreateManager = () => {
                                         required
                                     />
                                 </Form.Group>
+                            </Col>
+                            <Col md={12} className="mb-3">
+                                <Form.Label>Profile Image</Form.Label>
+                                <div className="d-flex align-items-center gap-3">
+                                    {formData.imagePreview && (
+                                        <img
+                                            src={formData.imagePreview}
+                                            alt="Preview"
+                                            style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '50%' }}
+                                        />
+                                    )}
+                                    <Form.Control
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageChange}
+                                    />
+                                </div>
                             </Col>
                             <Col md={12} className="mb-3">
                                 <Form.Group>

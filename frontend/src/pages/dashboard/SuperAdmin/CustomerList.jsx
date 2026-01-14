@@ -55,8 +55,16 @@ const CustomerList = () => {
                                     <tr key={customer._id}>
                                         <td className="ps-4 py-3">
                                             <div className="d-flex align-items-center">
-                                                <div className="avatar rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-3" style={{ width: '40px', height: '40px', fontWeight: 'bold' }}>
-                                                    {customer.first_name.charAt(0)}
+                                                <div className="avatar rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-3 overflow-hidden" style={{ width: '40px', height: '40px', fontWeight: 'bold' }}>
+                                                    {customer.image && customer.image.url && customer.image.url !== 'default_url' ? (
+                                                        <img
+                                                            src={customer.image.url.startsWith('http') ? customer.image.url : `http://localhost:5000${customer.image.url}`}
+                                                            alt={customer.first_name}
+                                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                        />
+                                                    ) : (
+                                                        customer.first_name.charAt(0)
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <h6 className="mb-0 fw-bold text-dark">{customer.first_name} {customer.last_name}</h6>

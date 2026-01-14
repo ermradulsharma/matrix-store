@@ -12,8 +12,10 @@ const {
   isAuthorizedRoles,
 } = require("../middlewares/authentication");
 
+const upload = require("../middlewares/upload");
+
 // User Routes
-router.post("/register", userController.userRegistration);
+router.post("/register", upload.single('image'), userController.userRegistration);
 router.post("/login", userController.loginUser);
 router.get("/logout", userController.logout);
 router.post("/password/forgot", userController.forgotPassword);
@@ -22,7 +24,7 @@ router.put("/password/reset/:token", userController.resetPassword);
 // Authenticated User Routes
 router.put("/password/change", isauthenticate, userController.changePassword);
 router.get("/profile", isauthenticate, userController.userProfile);
-router.put("/profile/update", isauthenticate, userController.updateProfile);
+router.put("/profile/update", isauthenticate, upload.single('image'), userController.updateProfile);
 
 // Dashboard Stats
 const dashboardController = require("../controllers/dashboardController");
@@ -58,6 +60,7 @@ router.post(
   "/admin/user/new",
   isauthenticate,
   isAuthorizedRoles("admin", "super_admin", "manager"),
+  upload.single('image'),
   userController.createUser
 );
 router.put(
@@ -70,6 +73,7 @@ router.put(
   "/admin/user/:id",
   isauthenticate,
   isAuthorizedRoles("admin", "super_admin"),
+  upload.single('image'),
   userController.updateUserAdmin
 );
 router.delete(
@@ -79,11 +83,19 @@ router.delete(
   userController.deleteUserProfile
 );
 
+router.put(
+  "/admin/user/:id/permissions",
+  isauthenticate,
+  isAuthorizedRoles("super_admin"),
+  userController.updateUserPermissions
+);
+
 // Category Routes
 router.post(
   "/category/new",
   isauthenticate,
   isAuthorizedRoles("admin", "super_admin"),
+  upload.single('image'),
   categoryController.createCategory
 );
 router.get("/categories", categoryController.getAllCategory);
@@ -92,6 +104,7 @@ router.put(
   "/category/:id",
   isauthenticate,
   isAuthorizedRoles("admin", "super_admin"),
+  upload.single('image'),
   categoryController.updateCategory
 );
 router.delete(
@@ -116,12 +129,14 @@ router.post(
   "/product/new",
   isauthenticate,
   isAuthorizedRoles("admin", "manager", "super_admin"),
+  upload.array('images', 5), // Allow up to 5 images
   productController.createProduct
 );
 router.put(
   "/product/:id",
   isauthenticate,
   isAuthorizedRoles("admin", "manager", "super_admin"),
+  upload.array('images', 5),
   productController.updateProduct
 );
 router.delete(
@@ -358,5 +373,30 @@ router.put("/notifications/:id/read", isauthenticate, notificationController.mar
 // Search Routes
 const searchController = require("../controllers/searchController");
 router.get("/admin/global-search", isauthenticate, isAuthorizedRoles("admin", "super_admin"), searchController.globalSearch);
+
+const roleController = require("../controllers/roleController");
+// Role Management (Super Admin Only)
+router.get(
+  "/admin/roles",
+  isauthenticate,
+  isAuthorizedRoles("super_admin"),
+  roleController.getAllRoles
+);
+
+router.put(
+  "/admin/role/:id/permissions",
+  isauthenticate,
+  isAuthorizedRoles("super_admin"),
+  roleController.updateRolePermissions
+);
+
+router.post(
+  "/admin/role/new",
+  isauthenticate,
+  isAuthorizedRoles("super_admin"),
+  roleController.createRole
+);
+
+// Role Management (Super Admin Only)
 
 module.exports = router;

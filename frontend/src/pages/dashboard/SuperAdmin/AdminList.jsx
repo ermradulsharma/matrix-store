@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Badge, Spinner, Container, Card } from 'react-bootstrap';
 import { fetchUsers, deleteUserProfile } from '../../../services/api';
-import { FaUserShield, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
+import { FaUserShield, FaEdit, FaTrash, FaEye, FaKey } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import UserPermissionsModal from './UserPermissionsModal';
 
 const AdminList = () => {
     const [admins, setAdmins] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [showPermissionModal, setShowPermissionModal] = useState(false);
     const navigate = useNavigate();
 
     const loadAdmins = React.useCallback(async () => {
@@ -42,6 +45,11 @@ const AdminList = () => {
         }
     };
 
+    const handlePermissionClick = (user) => {
+        setSelectedUser(user);
+        setShowPermissionModal(true);
+    };
+
     if (loading) return <div className="text-center p-5"><Spinner animation="border" /></div>;
 
     return (
@@ -74,8 +82,16 @@ const AdminList = () => {
                                     <tr key={admin._id}>
                                         <td className="ps-4 py-3">
                                             <div className="d-flex align-items-center">
-                                                <div className="avatar rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-3" style={{ width: '40px', height: '40px', fontWeight: 'bold' }}>
-                                                    {admin.first_name.charAt(0)}
+                                                <div className="avatar rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-3 overflow-hidden" style={{ width: '40px', height: '40px', fontWeight: 'bold' }}>
+                                                    {admin.image && admin.image.url && admin.image.url !== 'default_url' ? (
+                                                        <img
+                                                            src={admin.image.url.startsWith('http') ? admin.image.url : `http://localhost:5000${admin.image.url}`}
+                                                            alt={admin.first_name}
+                                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                        />
+                                                    ) : (
+                                                        admin.first_name.charAt(0)
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <h6 className="mb-0 fw-bold text-dark">{admin.first_name} {admin.last_name}</h6>
@@ -98,6 +114,9 @@ const AdminList = () => {
                                         </td>
                                         <td className="pe-4 py-3 text-end">
                                             <div className="btn-group">
+                                                <Button variant="link" size="sm" className="text-warning p-1" title="Permissions" onClick={() => handlePermissionClick(admin)}>
+                                                    <FaKey size={16} />
+                                                </Button>
                                                 <Button variant="link" size="sm" className="text-info p-1" title="View Details" onClick={() => navigate(`/admins/view/${admin._id}`)}>
                                                     <FaEye size={16} />
                                                 </Button>
@@ -127,6 +146,13 @@ const AdminList = () => {
                     </Table>
                 </Card.Body>
             </Card>
+
+            <UserPermissionsModal
+                show={showPermissionModal}
+                onHide={() => setShowPermissionModal(false)}
+                user={selectedUser}
+                onUpdateSuccess={loadAdmins}
+            />
         </Container>
     );
 };

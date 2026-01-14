@@ -4,10 +4,16 @@ const Category = require("../models/Category");
 const { default: slugify } = require("slugify");
 
 exports.createCategory = catchAsyncError(async (req, res, next) => {
-    const { title, description, image } = req.body;
+    const { title, description } = req.body;
     if (!title) {
         return next(new ErrorHandler("Category title is required", 400));
     }
+
+    let image = "https://example.com/default-category.png";
+    if (req.file) {
+        image = `/uploads/${req.file.filename}`;
+    }
+
     const slug = slugify(title, { lower: true, strict: true });
     const category = await Category.create({ title, description, slug, image });
     res.status(201).json({
@@ -43,6 +49,12 @@ exports.updateCategory = catchAsyncError(async (req, res, next) => {
     if (!category) {
         return next(new ErrorHandler("Category Not Found", 404));
     }
+
+    // Update image if provided
+    if (req.file) {
+        req.body.image = `/uploads/${req.file.filename}`;
+    }
+
     category = await Category.findByIdAndUpdate(req.params.id, req.body, {
         new: true,
         runValidators: true,

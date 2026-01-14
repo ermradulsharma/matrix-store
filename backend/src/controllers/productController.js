@@ -9,6 +9,31 @@ const User = require("../models/User");
 exports.createProduct = catchAsyncError(async (req, res, next) => {
   req.body.user_id = req.user.id;
 
+  // content-type: multipart/form-data leaves nested objects as strings if sent via JSON.stringify
+  // or simple fields. We need to parse them if they are strings.
+  ['dimensions', 'stockLimits', 'supplier'].forEach(field => {
+    if (typeof req.body[field] === 'string') {
+      try {
+        req.body[field] = JSON.parse(req.body[field]);
+      } catch (e) {
+        // Ignore parse error, maybe it wasn't valid JSON or just a string
+      }
+    }
+  });
+
+  let images = [];
+  if (req.files && req.files.length > 0) {
+    images = req.files.map(file => ({
+      public_id: file.filename,
+      url: `/uploads/${file.filename}`
+    }));
+  }
+  // If images are missing, maybe we should preserve empty or default?
+  // But if it's create, we expect images or default logic.
+  if (images.length > 0) {
+    req.body.images = images;
+  }
+
   // Create Product
   const product = await Product.create(req.body);
 
@@ -31,11 +56,41 @@ exports.createProduct = catchAsyncError(async (req, res, next) => {
   });
 });
 
-// Update Product (Detects Stock Changes)
+// Update Product
 exports.updateProduct = catchAsyncError(async (req, res, next) => {
   let product = await Product.findById(req.params.id);
   if (!product) {
     return next(new ErrorHandler("Product Not Found", 404));
+  }
+
+  // Parse nested objects if present
+  ['dimensions', 'stockLimits', 'supplier'].forEach(field => {
+    if (typeof req.body[field] === 'string') {
+      try {
+        req.body[field] = JSON.parse(req.body[field]);
+      } catch (e) {
+        // Ignore
+      }
+    }
+  });
+
+  // Handle Images
+  if (req.files && req.files.length > 0) {
+    const newImages = req.files.map(file => ({
+      public_id: file.filename,
+      url: `/uploads/${file.filename}`
+    }));
+
+    // Append new images to existing ones
+    const existingImages = product.images || [];
+    req.body.images = [...existingImages, ...newImages];
+  } else {
+    // If no new files, respect client's wish? 
+    // If client didn't send 'images' field (FormData without file/text), 
+    // we shouldn't wipe images.
+    if (!req.body.images) {
+      delete req.body.images;
+    }
   }
 
   // Check for stock change to log it
@@ -47,7 +102,7 @@ exports.updateProduct = catchAsyncError(async (req, res, next) => {
     await StockManagement.create({
       product_id: product._id,
       user_id: req.user.id,
-      type: 'manual_adjustment', // Assumed manual if done via edit form
+      type: 'manual_adjustment',
       quantity: diff,
       previousStock: oldStock,
       currentStock: newStock,

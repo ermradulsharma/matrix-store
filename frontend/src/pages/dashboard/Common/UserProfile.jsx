@@ -56,9 +56,19 @@ const UserProfile = () => {
                     <Row className="align-items-center">
                         <Col md={4} className="text-center border-end border-light-subtle mb-4 mb-md-0">
                             <div className="position-relative d-inline-block">
-                                <div className="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm border border-4 border-white" style={{ width: '120px', height: '120px', fontSize: '3rem', fontWeight: 'bold' }}>
-                                    {user.first_name?.charAt(0).toUpperCase()}
-                                </div>
+                                {user.image && user.image.url && user.image.url !== 'default_url' ? (
+                                    <div className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm border border-4 border-white overflow-hidden" style={{ width: '120px', height: '120px' }}>
+                                        <img
+                                            src={user.image.url.startsWith('http') ? user.image.url : `http://localhost:5000${user.image.url}`}
+                                            alt={user.name}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm border border-4 border-white" style={{ width: '120px', height: '120px', fontSize: '3rem', fontWeight: 'bold' }}>
+                                        {user.first_name?.charAt(0).toUpperCase()}
+                                    </div>
+                                )}
                             </div>
                             <h3 className="fw-bold text-dark mb-1">{user.name}</h3>
                             <Badge bg="info" className="px-3 py-2 rounded-pill text-uppercase text-xs fw-bold letter-spacing-1">{user.role}</Badge>
