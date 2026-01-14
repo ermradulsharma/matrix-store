@@ -7,6 +7,7 @@ import { WishlistContext } from "../../../context/WishlistContext";
 import RatingStars from "../RatingStars/RatingStars";
 import Loader from "../Loader/Loader";
 import { fetchProductById } from "../../../services/api";
+import { toast } from 'react-toastify';
 import "../../../styles/components/ProductDetails.css";
 
 function ProductDetails() {
@@ -14,7 +15,6 @@ function ProductDetails() {
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
@@ -27,7 +27,7 @@ function ProductDetails() {
         const data = await fetchProductById(id);
         setProduct(data);
       } catch (err) {
-        setError(err.message || "Failed to fetch product");
+        toast.error(err.message || "Failed to fetch product");
       } finally {
         setLoading(false);
       }
@@ -55,13 +55,7 @@ function ProductDetails() {
     return <Loader />;
   }
 
-  if (error) {
-    return (
-      <Container className="my-5">
-        <Alert variant="danger">Error: {error}</Alert>
-      </Container>
-    );
-  }
+
 
   if (!product) {
     return (

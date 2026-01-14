@@ -3,6 +3,7 @@ import { Table, Button, Badge, Spinner, Container, Card } from 'react-bootstrap'
 import { fetchUsers, deleteUserProfile } from '../../../services/api';
 import { FaTrash, FaUserTie, FaEye, FaEdit } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const ManagerList = () => {
     const navigate = useNavigate();
@@ -18,6 +19,7 @@ const ManagerList = () => {
             }
         } catch (error) {
             console.error('Error loading managers:', error);
+            toast.error("Failed to load managers");
         } finally {
             setLoading(false);
         }
@@ -32,10 +34,11 @@ const ManagerList = () => {
             try {
                 // Use the standard deleteUserProfile function
                 await deleteUserProfile(id);
+                toast.success("Manager deleted successfully");
                 loadManagers(); // Refresh list
             } catch (error) {
                 console.error('Error deleting manager:', error);
-                alert('Failed to delete manager');
+                toast.error('Failed to delete manager');
             }
         }
     };

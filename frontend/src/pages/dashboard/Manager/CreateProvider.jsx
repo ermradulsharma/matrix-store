@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Card, Alert } from 'react-bootstrap';
+import { Form, Button, Card } from 'react-bootstrap';
 import { createProvider, fetchUsers } from '../../../services/api';
 import { useNavigate } from 'react-router-dom';
+
+import { toast } from 'react-toastify';
 
 const CreateProvider = () => {
     const navigate = useNavigate();
@@ -23,7 +25,6 @@ const CreateProvider = () => {
             swiftCode: ''
         }
     });
-    const [error, setError] = useState('');
 
     useEffect(() => {
         // Fetch potential users to link to provider
@@ -65,17 +66,18 @@ const CreateProvider = () => {
         try {
             const res = await createProvider(formData);
             if (res.data.success) {
+                toast.success("Provider created successfully");
                 navigate('..');
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Error creating provider');
+            toast.error(err.response?.data?.message || 'Error creating provider');
         }
     };
 
     return (
         <div className="container-fluid">
             <h2 className="mb-4">Create New Provider</h2>
-            {error && <Alert variant="danger">{error}</Alert>}
+
 
             <Card className="shadow-sm">
                 <Card.Body>

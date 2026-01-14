@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Badge, Spinner, Alert, Container, Card } from 'react-bootstrap';
+import { Table, Button, Badge, Spinner, Container, Card } from 'react-bootstrap';
 import { fetchCategories, deleteCategory, toggleCategoryStatus } from '../../../services/api';
 import { FaTrash, FaEdit, FaToggleOn, FaToggleOff, FaPlus } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const CategoryList = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -20,7 +20,7 @@ const CategoryList = () => {
             const data = await fetchCategories();
             setCategories(data);
         } catch (err) {
-            setError('Failed to load categories');
+            toast.error('Failed to load categories');
             console.error(err);
         } finally {
             setLoading(false);
@@ -33,9 +33,10 @@ const CategoryList = () => {
                 const res = await deleteCategory(id);
                 if (res.success) {
                     setCategories(categories.filter(cat => cat._id !== id));
+                    toast.success("Category Deleted!");
                 }
             } catch (err) {
-                alert('Failed to delete category');
+                toast.error('Failed to delete category');
             }
         }
     };
@@ -47,9 +48,10 @@ const CategoryList = () => {
                 setCategories(categories.map(cat =>
                     cat._id === id ? { ...cat, status: res.status } : cat
                 ));
+                toast.success(`Category ${res.status === 'active' ? 'activated' : 'deactivated'}`);
             }
         } catch (err) {
-            alert('Failed to update status');
+            toast.error('Failed to update status');
         }
     };
 
@@ -72,7 +74,6 @@ const CategoryList = () => {
                     </Button>
                 </Card.Header>
                 <Card.Body className="p-0">
-                    {error && <Alert variant="danger" className="m-3">{error}</Alert>}
 
                     <Table responsive hover className="mb-0 align-middle">
                         <thead className="bg-light">

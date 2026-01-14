@@ -8,23 +8,28 @@ const userSchema = new mongoose.Schema({
     server_address: {
         type: String,
         default: "unknown",
+        trim: true
     },
     first_name: {
         type: String,
         required: [true, "Please Enter First Name"],
         maxLength: [30, "First Name can't exceed 30 characters."],
-        minLength: [2, "First Name should be at least 2 characters."]
+        minLength: [2, "First Name should be at least 2 characters."],
+        trim: true
     },
     last_name: {
         type: String,
         required: [true, "Please Enter Last Name"],
         maxLength: [30, "Last Name can't exceed 30 characters."],
-        minLength: [2, "Last Name should be at least 2 characters."]
+        minLength: [2, "Last Name should be at least 2 characters."],
+        trim: true
     },
     username: {
         type: String,
         unique: true,
         lowercase: true,
+        trim: true,
+        index: true
     },
 
     email: {
@@ -32,7 +37,9 @@ const userSchema = new mongoose.Schema({
         required: [true, "Please Enter E-mail"],
         unique: true,
         lowercase: true, // Convert email to lowercase
-        validate: [validators.isEmail, "Please enter a valid email."]
+        trim: true,
+        validate: [validators.isEmail, "Please enter a valid email."],
+        index: true
     },
     password: {
         type: String,
@@ -44,6 +51,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, "Please Enter Mobile Number"],
         unique: true,
+        trim: true,
         validate: {
             validator: function (v) {
                 return /^[0-9]{10}$/.test(v);
@@ -55,30 +63,35 @@ const userSchema = new mongoose.Schema({
         public_id: {
             type: String,
             default: "default_id",
-            required: true
+            trim: true
         },
         url: {
             type: String,
-            default: "default_url",
-            required: true
+            default: "default_url", // Consider a real default URL here or handle on frontend
+            trim: true
         }
     },
     role: {
         type: String,
         enum: ['super_admin', 'admin', 'manager', 'provider', 'customer'],
-        default: 'customer'
+        default: 'customer',
+        index: true,
+        trim: true
     },
     managedBy: {
         type: mongoose.Schema.ObjectId,
         ref: 'User',
-        required: false
+        required: false,
+        index: true
     },
     isActive: {
         type: Boolean,
-        default: true
+        default: true,
+        index: true
     },
     permissions: [{
-        type: String
+        type: String,
+        trim: true
     }],
     resetPasswordToken: String,
     resetPasswordExpire: Date,
@@ -124,4 +137,3 @@ userSchema.set('toJSON', { virtuals: true });
 userSchema.set('toObject', { virtuals: true });
 
 module.exports = mongoose.model("User", userSchema);
-

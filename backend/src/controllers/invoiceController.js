@@ -23,6 +23,10 @@ exports.createInvoice = catchAsyncError(async (req, res, next) => {
         if (requirement.assignedTo.toString() !== provider._id.toString()) {
             return next(new ErrorHandler("This requirement is not assigned to you", 403));
         }
+        // Ensure requirement matches workflow
+        if (requirement.status !== 'fulfilled') {
+            return next(new ErrorHandler("Requirement must be marked as fulfilled before generating an invoice", 400));
+        }
     }
 
     // Calculate totals

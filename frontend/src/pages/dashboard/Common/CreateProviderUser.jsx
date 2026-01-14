@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Card, Alert, Spinner } from 'react-bootstrap';
+import { Form, Button, Card, Spinner } from 'react-bootstrap';
 import { createUser, fetchUsers } from '../../../services/api';
 import { useNavigate } from 'react-router-dom';
 import { FaUserPlus, FaArrowLeft } from 'react-icons/fa';
 import { useAuth } from '../../../context/AuthContext';
+
+import { toast } from 'react-toastify';
 
 const CreateProviderUser = () => {
     const navigate = useNavigate();
@@ -22,8 +24,6 @@ const CreateProviderUser = () => {
 
     const [managers, setManagers] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(null);
 
     useEffect(() => {
         if (isAdmin) {
@@ -51,13 +51,11 @@ const CreateProviderUser = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError(null);
-        setSuccess(null);
 
         try {
             const res = await createUser(formData);
             if (res.data.success) {
-                setSuccess("Provider User created successfully!");
+                toast.success("Provider User created successfully!");
                 // Redirect to provider list or provider profile creation?
                 // The task says "Admin add manager and Provider... as well as Manager add providers"
                 // Usually this means adding the USER account.
@@ -65,7 +63,7 @@ const CreateProviderUser = () => {
                 setTimeout(() => navigate('..'), 1500);
             }
         } catch (err) {
-            setError(err.response?.data?.message || "Failed to create provider user");
+            toast.error(err.response?.data?.message || "Failed to create provider user");
         } finally {
             setLoading(false);
         }
@@ -84,8 +82,7 @@ const CreateProviderUser = () => {
                 <div className="col-md-8">
                     <Card className="shadow-sm">
                         <Card.Body className="p-4">
-                            {error && <Alert variant="danger">{error}</Alert>}
-                            {success && <Alert variant="success">{success}</Alert>}
+
 
                             <Form onSubmit={handleSubmit}>
                                 <div className="row">

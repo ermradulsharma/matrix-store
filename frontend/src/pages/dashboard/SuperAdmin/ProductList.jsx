@@ -1,28 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Badge, Spinner, Form, InputGroup, Pagination, Container, Card } from 'react-bootstrap';
-import { fetchProducts, deleteProduct } from '../../../services/api'; // Ensure deleteProduct is available
+import { fetchProducts, deleteProduct, toggleProductStatus } from '../../../services/api';
 import { Link } from 'react-router-dom';
-import { FaEdit, FaTrash, FaEye, FaSearch, FaPlus, FaBoxOpen } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEye, FaSearch, FaPlus, FaBoxOpen, FaToggleOn, FaToggleOff, FaClipboardList } from 'react-icons/fa';
+import { useAuth } from '../../../context/AuthContext';
+import StockManagementModal from '../Common/StockManagementModal';
+import { toast } from 'react-toastify';
 
 const ProductList = () => {
+    const { user } = useAuth();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [showStockModal, setShowStockModal] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
     const LIMIT = 10;
+
+    const getDashboardPrefix = () => {
+        if (user?.role === 'super_admin') return '/products';
+        if (user?.role === 'admin') return '/admin/products';
+        if (user?.role === 'manager') return '/manager/products';
+        if (user?.role === 'provider') return '/provider/products';
+        return '/dashboard';
+    };
+
+    const prefix = getDashboardPrefix();
 
     const loadProducts = React.useCallback(async () => {
         setLoading(true);
         try {
-            // Calculate skip based on page
             const skip = (currentPage - 1) * LIMIT;
             const res = await fetchProducts({ limit: LIMIT, skip, search });
-
             setProducts(res.products);
             setTotalPages(Math.ceil(res.total / LIMIT));
         } catch (error) {
             console.error('Error loading products:', error);
+            toast.error("Failed to load products");
         } finally {
             setLoading(false);
         }
@@ -36,17 +51,29 @@ const ProductList = () => {
         if (window.confirm('Are you sure you want to delete this product?')) {
             try {
                 await deleteProduct(id);
-                loadProducts(); // Refresh list
+                toast.success("Product deleted successfully");
+                loadProducts();
             } catch (error) {
                 console.error('Error deleting product:', error);
-                alert('Failed to delete product');
+                toast.error(error.response?.data?.message || 'Failed to delete product');
             }
+        }
+    };
+
+    const handleToggleStatus = async (id, currentStatus) => {
+        try {
+            await toggleProductStatus(id);
+            toast.success(`Product ${currentStatus === 'active' ? 'deactivated' : 'activated'}`);
+            loadProducts();
+        } catch (error) {
+            console.error('Error toggling status:', error);
+            toast.error('Failed to update product status');
         }
     };
 
     const handleSearch = (e) => {
         e.preventDefault();
-        setCurrentPage(1); // Reset to page 1 on search
+        setCurrentPage(1);
         loadProducts();
     };
 
@@ -59,7 +86,7 @@ const ProductList = () => {
                             <FaBoxOpen className="text-primary me-2" size={20} />
                             <h4 className="fw-bold text-dark mb-0">Product Management</h4>
                         </div>
-                        <Link to="/dashboard/super-admin/products/new" className="btn btn-primary d-flex align-items-center">
+                        <Link to={`${prefix}/new`} className="btn btn-primary d-flex align-items-center">
                             <FaPlus className="me-2" /> Add New Product
                         </Link>
                     </div>
@@ -87,7 +114,7 @@ const ProductList = () => {
                                     <th className="ps-4 py-3 text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-0">Product</th>
                                     <th className="py-3 text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-0">Price</th>
                                     <th className="py-3 text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-0">Stock</th>
-                                    <th className="py-3 text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-0">Category</th>
+                                    <th className="py-3 text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-0">Status</th>
                                     <th className="py-3 text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-0">Rating</th>
                                     <th className="py-3 text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-0">Owner</th>
                                     <th className="pe-4 py-3 text-end text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-0">Actions</th>
@@ -118,7 +145,9 @@ const ProductList = () => {
                                                 </Badge>
                                             </td>
                                             <td className="py-3">
-                                                <span className="text-secondary text-sm">{product.category}</span>
+                                                <Badge bg={product.status === 'active' ? 'success' : 'warning'} className="text-capitalize fs-7">
+                                                    {product.status || 'active'}
+                                                </Badge>
                                             </td>
                                             <td className="py-3">
                                                 <div className="d-flex align-items-center">
@@ -139,12 +168,35 @@ const ProductList = () => {
                                             </td>
                                             <td className="pe-4 py-3 text-end">
                                                 <div className="btn-group">
-                                                    <Link to={`/product/${product._id}`} className="btn btn-sm btn-link text-info p-1" target="_blank" title="View Product">
+                                                    {/* View Link: Use internal dashboard route */}
+                                                    <Link to={`${prefix}/view/${product._id}`} className="btn btn-sm btn-link text-info p-1" title="View Product">
                                                         <FaEye size={16} />
                                                     </Link>
-                                                    <Link to={`/dashboard/super-admin/product/edit/${product._id}`} className="btn btn-sm btn-link text-primary p-1" title="Edit Product">
+                                                    {/* Configure Edit Link */}
+                                                    <Link to={`${prefix}/edit/${product._id}`} className="btn btn-sm btn-link text-primary p-1" title="Edit Product">
                                                         <FaEdit size={16} />
                                                     </Link>
+
+                                                    {/* Toggle Status Button */}
+                                                    <Button
+                                                        variant="link"
+                                                        size="sm"
+                                                        className={product.status === 'active' ? 'text-warning p-1' : 'text-success p-1'}
+                                                        onClick={() => handleToggleStatus(product._id, product.status)}
+                                                        title={product.status === 'active' ? 'Deactivate' : 'Activate'}
+                                                    >
+                                                        {product.status === 'active' ? <FaToggleOn size={16} /> : <FaToggleOff size={16} />}
+                                                    </Button>
+                                                    <Button
+                                                        variant="link"
+                                                        size="sm"
+                                                        className="text-secondary p-1"
+                                                        onClick={() => { setSelectedProduct(product); setShowStockModal(true); }}
+                                                        title="Manage Stock"
+                                                    >
+                                                        <FaClipboardList size={16} />
+                                                    </Button>
+
                                                     <Button variant="link" size="sm" className="text-danger p-1" onClick={() => handleDelete(product._id)} title="Delete Product">
                                                         <FaTrash size={16} />
                                                     </Button>
@@ -192,6 +244,12 @@ const ProductList = () => {
                     </Card.Footer>
                 )}
             </Card>
+            <StockManagementModal
+                show={showStockModal}
+                onHide={() => setShowStockModal(false)}
+                product={selectedProduct}
+                onSuccess={loadProducts}
+            />
         </Container>
     );
 };

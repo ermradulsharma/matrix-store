@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Card, Alert, Spinner } from 'react-bootstrap';
+import { Form, Button, Card, Spinner } from 'react-bootstrap';
 import { fetchProviderDetails, updateProvider } from '../../../services/api';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FaEdit, FaArrowLeft } from 'react-icons/fa';
+
+import { toast } from 'react-toastify';
 
 const EditProvider = ({ redirectPath }) => {
     const navigate = useNavigate();
     const { id } = useParams();
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
-    const [error, setError] = useState('');
     const [formData, setFormData] = useState({
         companyName: '',
         businessRegistration: '',
@@ -49,7 +50,7 @@ const EditProvider = ({ redirectPath }) => {
                     });
                 }
             } catch (err) {
-                setError('Error loading provider details');
+                toast.error('Error loading provider details');
             } finally {
                 setLoading(false);
             }
@@ -82,10 +83,11 @@ const EditProvider = ({ redirectPath }) => {
         try {
             const res = await updateProvider(id, formData);
             if (res.data.success) {
+                toast.success("Provider updated successfully");
                 navigate(redirectPath || '..'); // Use redirectPath if provided
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Error updating provider');
+            toast.error(err.response?.data?.message || 'Error updating provider');
         } finally {
             setUpdating(false);
         }
@@ -102,7 +104,7 @@ const EditProvider = ({ redirectPath }) => {
                 <h2 className="mb-0">Edit Provider</h2>
             </div>
 
-            {error && <Alert variant="danger">{error}</Alert>}
+
 
             <Card className="shadow-sm">
                 <Card.Body>

@@ -3,6 +3,7 @@ import { Table, Button, Badge, Spinner } from 'react-bootstrap';
 import { fetchInvoices, submitInvoice } from '../../../services/api';
 import { Link } from 'react-router-dom';
 import { FaPlus, FaPaperPlane, FaEye } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 const InvoiceHistory = () => {
     const [invoices, setInvoices] = useState([]);
@@ -20,6 +21,7 @@ const InvoiceHistory = () => {
             }
         } catch (error) {
             console.error('Error loading invoices:', error);
+            toast.error("Failed to load invoices");
         } finally {
             setLoading(false);
         }
@@ -29,9 +31,11 @@ const InvoiceHistory = () => {
         if (window.confirm('Are you sure you want to submit this invoice for approval?')) {
             try {
                 await submitInvoice(id);
+                toast.success("Invoice submitted for approval!");
                 loadInvoices();
             } catch (error) {
                 console.error('Error submitting invoice:', error);
+                toast.error("Failed to submit invoice");
             }
         }
     };

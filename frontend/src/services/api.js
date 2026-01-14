@@ -325,6 +325,38 @@ export const deleteProduct = async (id) => {
   }
 };
 
+
+export const toggleProductStatus = async (id) => {
+  try {
+    const res = await api.put(`/product/${id}/toggle-status`);
+    return res.data;
+  } catch (error) {
+    console.error("Error toggling product status:", error);
+    throw error;
+  }
+};
+
+export const adjustStock = async (id, data) => {
+  try {
+    const res = await api.put(`/product/${id}/stock/adjust`, data);
+    return res.data;
+  } catch (error) {
+    console.error("Error adjusting stock:", error);
+    throw error;
+  }
+};
+
+export const fetchStockHistory = async (id) => {
+  try {
+    const res = await api.get(`/product/${id}/stock/history`);
+    return res.data.history;
+  } catch (error) {
+    console.error("Error fetching stock history:", error);
+    throw error;
+  }
+};
+
+
 // ============= ORDERS =============
 
 // ============= DASHBOARD =============
@@ -422,6 +454,10 @@ export const createRequirement = (data) =>
   api.post("/requirement/create", data);
 export const fetchRequirements = () => api.get("/requirements");
 export const fetchRequirementDetails = (id) => api.get(`/requirement/${id}`);
+export const updateRequirement = (id, data) => api.put(`/requirement/${id}`, data);
+export const approveRequirement = (id, data) => api.put(`/requirement/${id}/approve`, data);
+export const sendRequirement = (id) => api.put(`/requirement/${id}/send`);
+export const providerUpdateRequirement = (id, data) => api.put(`/requirement/${id}/provider-update`, data);
 export const acceptRequirement = (id) => api.put(`/requirement/${id}/accept`);
 export const fulfillRequirement = (id) => api.put(`/requirement/${id}/fulfill`);
 export const rejectRequirement = (id, reason) =>

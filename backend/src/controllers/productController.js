@@ -1,15 +1,129 @@
 const Product = require("../models/Product");
+const StockManagement = require("../models/StockManagement");
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncError = require("../middlewares/catchAsyncErrors");
 const Features = require("../utils/features");
-const User = require("../models/User"); // It should be 'User' instead of 'user'
+const User = require("../models/User");
 
+// Create Product
 exports.createProduct = catchAsyncError(async (req, res, next) => {
   req.body.user_id = req.user.id;
+
+  // Create Product
   const product = await Product.create(req.body);
+
+  // Log Initial Stock Movement
+  if (product.stock > 0) {
+    await StockManagement.create({
+      product_id: product._id,
+      user_id: req.user.id,
+      type: 'initial',
+      quantity: product.stock,
+      previousStock: 0,
+      currentStock: product.stock,
+      note: 'Initial stock creation'
+    });
+  }
+
   res.status(201).json({
     success: true,
     product,
+  });
+});
+
+// Update Product (Detects Stock Changes)
+exports.updateProduct = catchAsyncError(async (req, res, next) => {
+  let product = await Product.findById(req.params.id);
+  if (!product) {
+    return next(new ErrorHandler("Product Not Found", 404));
+  }
+
+  // Check for stock change to log it
+  if (req.body.stock !== undefined && req.body.stock != product.stock) {
+    const oldStock = product.stock;
+    const newStock = parseInt(req.body.stock);
+    const diff = newStock - oldStock;
+
+    await StockManagement.create({
+      product_id: product._id,
+      user_id: req.user.id,
+      type: 'manual_adjustment', // Assumed manual if done via edit form
+      quantity: diff,
+      previousStock: oldStock,
+      currentStock: newStock,
+      note: 'Updated via Edit Product form'
+    });
+  }
+
+  // Update Fields
+  product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  res.status(200).json({
+    success: true,
+    product,
+    message: "Product update successfully",
+  });
+});
+
+// Adjust Stock (Dedicated API)
+exports.adjustStock = catchAsyncError(async (req, res, next) => {
+  const { quantity, type, note } = req.body;
+  const product = await Product.findById(req.params.id);
+
+  if (!product) {
+    return next(new ErrorHandler("Product Not Found", 404));
+  }
+
+  const oldStock = product.stock;
+  let newStock = oldStock;
+
+  if (type === 'add') {
+    newStock += parseInt(quantity);
+  } else if (type === 'subtract') {
+    newStock -= parseInt(quantity);
+  } else {
+    // Direct set? Only add/subtract supported for explicit adjustment usually
+    return next(new ErrorHandler("Invalid adjustment type", 400));
+  }
+
+  if (newStock < 0) {
+    return next(new ErrorHandler("Stock cannot be negative", 400));
+  }
+
+  product.stock = newStock;
+  await product.save();
+
+  // Log Movement
+  await StockManagement.create({
+    product_id: product._id,
+    user_id: req.user.id,
+    type: type === 'add' ? 'manual_adjustment' : 'manual_adjustment', // Or refine types
+    quantity: type === 'add' ? quantity : -quantity,
+    previousStock: oldStock,
+    currentStock: newStock,
+    note: note || 'Manual Stock Adjustment'
+  });
+
+  res.status(200).json({
+    success: true,
+    product,
+    message: "Stock adjusted successfully"
+  });
+});
+
+// Get Stock History
+exports.stockHistory = catchAsyncError(async (req, res, next) => {
+  const history = await StockManagement.find({ product_id: req.params.id })
+    .populate('user_id', 'name email role')
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({
+    success: true,
+    history
   });
 });
 
@@ -42,21 +156,18 @@ exports.getProductDetails = catchAsyncError(async (req, res, next) => {
   });
 });
 
-exports.updateProduct = catchAsyncError(async (req, res, next) => {
-  let product = await Product.findById(req.params.id);
+exports.toggleProductStatus = catchAsyncError(async (req, res, next) => {
+  const product = await Product.findById(req.params.id);
   if (!product) {
     return next(new ErrorHandler("Product Not Found", 404));
   }
+  product.status = product.status === "active" ? "inactive" : "active";
+  await product.save();
 
-  product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-    new: true, // This option returns the updated document
-    runValidators: true,
-    useFindAndModify: false,
-  });
   res.status(200).json({
     success: true,
-    product,
-    message: "Product update successfully",
+    message: `Product ${product.status} successfully`,
+    product
   });
 });
 

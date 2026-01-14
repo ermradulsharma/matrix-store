@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Button, Alert, Spinner, Container, Row, Col } from 'react-bootstrap';
+import { Card, Form, Button, Spinner, Container, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile, updateUserProfile } from '../../../services/api';
 import { FaArrowLeft, FaSave, FaTimes } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 const UpdateProfile = () => {
     const [formData, setFormData] = useState({
@@ -11,8 +12,6 @@ const UpdateProfile = () => {
         mobile: ''
     });
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -30,7 +29,7 @@ const UpdateProfile = () => {
                 mobile: user.mobile_no || ''
             });
         } catch (error) {
-            setError("Failed to load profile");
+            toast.error("Failed to load profile");
         } finally {
             setLoading(false);
         }
@@ -42,17 +41,15 @@ const UpdateProfile = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError(null);
-        setSuccess(null);
         try {
             const res = await updateUserProfile(formData);
             if (res.success) {
-                setSuccess("Profile updated successfully");
+                toast.success("Profile updated successfully");
                 // Optional: update context user if name changed
                 setTimeout(() => navigate(-1), 1500);
             }
         } catch (err) {
-            setError(err.response?.data?.message || "Update failed");
+            toast.error(err.response?.data?.message || "Update failed");
         }
     };
 
@@ -68,8 +65,7 @@ const UpdateProfile = () => {
                     </Button>
                 </Card.Header>
                 <Card.Body className="p-4">
-                    {error && <Alert variant="danger">{error}</Alert>}
-                    {success && <Alert variant="success">{success}</Alert>}
+
 
                     <Form onSubmit={handleSubmit}>
                         <Row>

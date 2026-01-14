@@ -4,7 +4,8 @@ const orderSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.ObjectId,
         ref: "User",
-        required: [true, "Order must belong to a user"]
+        required: [true, "Order must belong to a user"],
+        index: true
     },
     orderItems: [
         {
@@ -15,7 +16,8 @@ const orderSchema = new mongoose.Schema({
             },
             name: {
                 type: String,
-                required: true
+                required: true,
+                trim: true
             },
             quantity: {
                 type: Number,
@@ -29,49 +31,60 @@ const orderSchema = new mongoose.Schema({
             },
             image: {
                 type: String,
-                required: true
+                required: true,
+                trim: true
             }
         }
     ],
-    shippingAddress: {
+    // Renamed from shippingAddress to shippingInfo to match controller/dashboard usage
+    shippingInfo: {
         address: {
             type: String,
-            required: [true, "Please provide shipping address"]
+            required: [true, "Please provide shipping address"],
+            trim: true
         },
         city: {
             type: String,
-            required: [true, "Please provide city"]
+            required: [true, "Please provide city"],
+            trim: true
         },
         state: {
             type: String,
-            required: [true, "Please provide state"]
+            required: [true, "Please provide state"],
+            trim: true
         },
         country: {
             type: String,
-            required: [true, "Please provide country"]
+            required: [true, "Please provide country"],
+            trim: true
         },
         pincode: {
             type: String,
-            required: [true, "Please provide pincode"]
+            required: [true, "Please provide pincode"],
+            trim: true
         },
         phoneNo: {
             type: String,
-            required: [true, "Please provide phone number"]
+            required: [true, "Please provide phone number"],
+            trim: true
         }
     },
     paymentInfo: {
         id: {
             type: String,
-            required: false
+            required: false,
+            trim: true
         },
         status: {
             type: String,
-            required: false
+            required: false,
+            trim: true
         },
         method: {
             type: String,
             enum: ['card', 'upi', 'netbanking', 'cod', 'wallet'],
-            default: 'cod'
+            default: 'cod',
+            trim: true
         }
     },
     paidAt: {
@@ -80,27 +93,34 @@ const orderSchema = new mongoose.Schema({
     itemsPrice: {
         type: Number,
         required: true,
-        default: 0.0
+        default: 0.0,
+        min: 0
     },
     taxPrice: {
         type: Number,
         required: true,
-        default: 0.0
+        default: 0.0,
+        min: 0
     },
     shippingPrice: {
         type: Number,
         required: true,
-        default: 0.0
+        default: 0.0,
+        min: 0
     },
     totalPrice: {
         type: Number,
         required: true,
-        default: 0.0
+        default: 0.0,
+        min: 0
     },
     orderStatus: {
         type: String,
         enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
-        default: 'pending'
+        default: 'pending',
+        required: true,
+        index: true,
+        trim: true
     },
     deliveredAt: {
         type: Date
@@ -109,7 +129,8 @@ const orderSchema = new mongoose.Schema({
         type: Date
     },
     cancellationReason: {
-        type: String
+        type: String,
+        trim: true
     }
 }, {
     timestamps: true

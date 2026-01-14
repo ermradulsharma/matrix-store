@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, Badge, Spinner, Modal, Form } from 'react-bootstrap';
 import { fetchInvoices, approveInvoice, rejectInvoice } from '../../../services/api';
 import { FaCheck, FaTimes, FaEye } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 const InvoiceApprovals = () => {
     const [invoices, setInvoices] = useState([]);
@@ -22,6 +23,7 @@ const InvoiceApprovals = () => {
             }
         } catch (error) {
             console.error('Error loading invoices:', error);
+            toast.error("Failed to load invoices");
         } finally {
             setLoading(false);
         }
@@ -31,9 +33,11 @@ const InvoiceApprovals = () => {
         if (window.confirm('Are you sure you want to approve this invoice?')) {
             try {
                 await approveInvoice(id);
+                toast.success("Invoice Approved!");
                 loadInvoices();
             } catch (error) {
                 console.error('Error approving invoice:', error);
+                toast.error("Failed to approve invoice");
             }
         }
     };
@@ -47,11 +51,13 @@ const InvoiceApprovals = () => {
         e.preventDefault();
         try {
             await rejectInvoice(selectedInvoice._id, rejectReason);
+            toast.info("Invoice Rejected");
             setShowRejectModal(false);
             setRejectReason('');
             loadInvoices();
         } catch (error) {
             console.error('Error rejecting invoice:', error);
+            toast.error("Failed to reject invoice");
         }
     };
 

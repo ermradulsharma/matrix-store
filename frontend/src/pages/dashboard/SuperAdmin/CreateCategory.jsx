@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { Form, Button, Card, Spinner, Alert, Container, Row, Col } from 'react-bootstrap';
+import { Form, Button, Card, Spinner, Container, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { createCategory } from '../../../services/api';
 import { FaSave, FaArrowLeft, FaCloudUploadAlt, FaTimes } from 'react-icons/fa';
 
+import { toast } from 'react-toastify';
+
 const CreateCategory = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
 
     const [formData, setFormData] = useState({
@@ -36,11 +36,9 @@ const CreateCategory = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError('');
-        setSuccess(null);
 
         if (!formData.image) {
-            setError('Please select an image');
+            toast.error('Please select an image');
             setLoading(false);
             return;
         }
@@ -48,11 +46,11 @@ const CreateCategory = () => {
         try {
             const res = await createCategory(formData);
             if (res.success) {
-                setSuccess("Category created successfully!");
+                toast.success("Category created successfully!");
                 setTimeout(() => navigate(-1), 1500);
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to create category');
+            toast.error(err.response?.data?.message || 'Failed to create category');
         } finally {
             setLoading(false);
         }
@@ -66,8 +64,7 @@ const CreateCategory = () => {
                     <Button variant="danger" className='d-flex align-items-center gap-1 justify-content-center' onClick={() => navigate(-1)}><FaArrowLeft /> Back </Button>
                 </Card.Header>
                 <Card.Body className="p-4">
-                    {error && <Alert variant="danger">{error}</Alert>}
-                    {success && <Alert variant="success">{success}</Alert>}
+
 
                     <Form onSubmit={handleSubmit}>
                         <Row>

@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Badge, Spinner, Alert, Container, Card } from 'react-bootstrap';
+import { Table, Button, Badge, Spinner, Container, Card } from 'react-bootstrap';
 import { fetchUsers, deleteUserProfile } from '../../../services/api';
 import { FaUserShield, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const AdminList = () => {
     const [admins, setAdmins] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(null);
     const navigate = useNavigate();
 
     const loadAdmins = React.useCallback(async () => {
@@ -19,7 +18,7 @@ const AdminList = () => {
             }
         } catch (error) {
             console.error('Error loading admins:', error);
-            setError('Failed to load admins');
+            toast.error('Failed to load admins');
         } finally {
             setLoading(false);
         }
@@ -34,13 +33,11 @@ const AdminList = () => {
             try {
                 const res = await deleteUserProfile(id);
                 if (res.data.success) {
-                    setSuccess('Admin deleted successfully');
+                    toast.success('Admin deleted successfully');
                     setAdmins(admins.filter(a => a._id !== id));
-                    setTimeout(() => setSuccess(null), 3000);
                 }
             } catch (err) {
-                setError(err.response?.data?.message || 'Failed to delete admin');
-                setTimeout(() => setError(null), 3000);
+                toast.error(err.response?.data?.message || 'Failed to delete admin');
             }
         }
     };
@@ -60,8 +57,6 @@ const AdminList = () => {
                     </Button>
                 </Card.Header>
                 <Card.Body className="p-0">
-                    {error && <Alert variant="danger" className="m-3">{error}</Alert>}
-                    {success && <Alert variant="success" className="m-3">{success}</Alert>}
 
                     <Table responsive hover className="mb-0 align-middle">
                         <thead className="bg-light">

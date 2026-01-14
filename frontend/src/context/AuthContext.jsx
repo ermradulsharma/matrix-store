@@ -1,12 +1,12 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { loginUser, registerUser, logoutUser, getUserProfile } from '../services/api';
+import { toast } from 'react-toastify';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
 
     // Load user from localStorage on mount
     useEffect(() => {
@@ -47,7 +47,6 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         setLoading(true);
-        setError(null);
         try {
             const response = await loginUser(email, password);
             if (response.success && response.user) {
@@ -55,12 +54,12 @@ export const AuthProvider = ({ children }) => {
                 return { success: true, user: response.user };
             } else {
                 const errorMsg = response.message || 'Login failed';
-                setError(errorMsg);
+                toast.error(errorMsg);
                 return { success: false, error: errorMsg };
             }
         } catch (e) {
             const errorMsg = e.response?.data?.message || 'Login failed. Please try again.';
-            setError(errorMsg);
+            toast.error(errorMsg);
             return { success: false, error: errorMsg };
         } finally {
             setLoading(false);
@@ -70,6 +69,7 @@ export const AuthProvider = ({ children }) => {
     const logout = async () => {
         try {
             await logoutUser();
+            toast.success('Logged out successfully');
         } catch (e) {
             console.error('Logout error:', e);
         } finally {
@@ -79,7 +79,6 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (userData) => {
         setLoading(true);
-        setError(null);
         try {
             const response = await registerUser(userData);
             if (response.success && response.user) {
@@ -87,12 +86,12 @@ export const AuthProvider = ({ children }) => {
                 return { success: true, user: response.user };
             } else {
                 const errorMsg = response.message || 'Registration failed';
-                setError(errorMsg);
+                toast.error(errorMsg);
                 return { success: false, error: errorMsg };
             }
         } catch (e) {
             const errorMsg = e.response?.data?.message || 'Registration failed. Please try again.';
-            setError(errorMsg);
+            toast.error(errorMsg);
             return { success: false, error: errorMsg };
         } finally {
             setLoading(false);
@@ -103,7 +102,6 @@ export const AuthProvider = ({ children }) => {
         user,
         isAuthenticated: !!user,
         loading,
-        error,
         login,
         logout,
         register,

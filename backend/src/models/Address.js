@@ -4,37 +4,57 @@ const addressSchema = new mongoose.Schema({
     user_id: {
         type: mongoose.Schema.ObjectId,
         ref: "User",
-        required: true
+        required: true,
+        index: true
     },
     address_1: {
         type: String,
-        required: [true, "Please enter Address Line 1."]
+        required: [true, "Please enter Address Line 1."],
+        trim: true
     },
     address_2: {
         type: String,
+        trim: true
     },
     city: {
         type: String,
-        required: [true, "Please enter City."]
+        required: [true, "Please enter City."],
+        trim: true
     },
     state: {
         type: String,
-        required: [true, "Please enter State."]
+        required: [true, "Please enter State."],
+        trim: true
     },
     country: {
         type: String,
-        required: [true, "Please enter Country."]
+        required: [true, "Please enter Country."],
+        trim: true,
+        default: "India" // Assuming India based on context (phone/pin code format)
     },
     pincode: {
         type: String,
-        required: [true, "Please enter Pincode."]
+        required: [true, "Please enter Pincode."],
+        trim: true
+    },
+    // Adding mobile number as it's often associated with delivery addresses
+    mobile: {
+        type: String,
+        required: [true, "Please enter Mobile Number."],
+        trim: true,
+        validate: {
+            validator: function (v) {
+                return /\d{10}/.test(v); // Basic 10-digit validation
+            },
+            message: props => `${props.value} is not a valid mobile number!`
+        }
     },
     latitude: {
-        type: Number, // Use Number type for latitude
+        type: Number,
         required: true
     },
     longitude: {
-        type: Number, // Use Number type for longitude
+        type: Number,
         required: true
     },
     location: {
@@ -45,16 +65,15 @@ const addressSchema = new mongoose.Schema({
         },
         coordinates: {
             type: [Number],
-            required: true
+            required: true,
+            index: "2dsphere"
         }
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
     }
+}, {
+    timestamps: true
 });
 
-addressSchema.index({ location: "2dsphere" }); // Create a geospatial index
+addressSchema.index({ location: "2dsphere" });
 
 const Address = mongoose.model("Address", addressSchema);
 

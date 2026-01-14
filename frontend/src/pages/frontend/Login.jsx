@@ -1,26 +1,26 @@
 import React, { useContext, useState } from 'react';
-import { Container, Form, Button, Card, Alert } from 'react-bootstrap';
+import { Container, Form, Button, Card } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
+import { toast } from 'react-toastify';
 
 const Login = () => {
-    const { login, loading, error } = useContext(AuthContext);
+    const { login, loading } = useContext(AuthContext);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [localError, setLocalError] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLocalError('');
 
         if (!email || !password) {
-            setLocalError('Please enter both email and password');
+            toast.error('Please enter both email and password');
             return;
         }
 
         const result = await login(email, password);
         if (result.success) {
+            toast.success("Login Successful!");
             const role = result.user.role;
             if (role === 'super_admin') {
                 navigate('/dashboard');
@@ -33,8 +33,6 @@ const Login = () => {
             } else {
                 navigate('/profile');
             }
-        } else {
-            setLocalError(result.error || 'Login failed');
         }
     };
 
@@ -43,7 +41,6 @@ const Login = () => {
             <Card>
                 <Card.Body>
                     <h2 className="text-center mb-4">Login</h2>
-                    {(error || localError) && <Alert variant="danger">{error || localError}</Alert>}
                     <Form onSubmit={handleSubmit}>
                         <Form.Group className="mb-3">
                             <Form.Label>Email</Form.Label>

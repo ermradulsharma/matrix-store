@@ -3,6 +3,7 @@ import { Form, Button, Card, Alert, Table } from 'react-bootstrap';
 import { createInvoice, submitInvoice } from '../../../services/api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FaPlus, FaTrash } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 const CreateInvoice = () => {
     const navigate = useNavigate();
@@ -11,16 +12,16 @@ const CreateInvoice = () => {
 
     const [formData, setFormData] = useState({
         requirement: requirement?._id || '',
-        items: requirement ? [{
-            description: requirement.title,
-            quantity: requirement.productDetails.quantity,
-            unitPrice: requirement.productDetails.estimatedPrice
-        }] : [{ description: '', quantity: 1, unitPrice: 0 }],
+        items: requirement ? requirement.items.map(item => ({
+            description: item.name,
+            quantity: item.fulfilledQuantity || item.quantity,
+            unitPrice: item.expectedPrice || 0
+        })) : [{ description: '', quantity: 1, unitPrice: 0 }],
         paymentMethod: 'bank_transfer',
         paymentReference: '',
         notes: ''
     });
-    const [error, setError] = useState('');
+    // const [error, setError] = useState(''); // Removed unused error state
 
     const calculateTotal = () => {
         return formData.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
@@ -51,17 +52,18 @@ const CreateInvoice = () => {
             if (res.data.success) {
                 // Auto-submit the invoice after creation for simplicity in this flow
                 await submitInvoice(res.data.invoice._id);
+                toast.success("Invoice created and submitted successfully!");
                 navigate('/dashboard/provider/invoices');
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Error creating invoice');
+            toast.error(err.response?.data?.message || 'Error creating invoice');
         }
     };
 
     return (
         <div className="container-fluid">
             <h2 className="mb-4">Create New Invoice</h2>
-            {error && <Alert variant="danger">{error}</Alert>}
+            {/* Error handling moved to Toast */}
 
             <Card className="shadow-sm">
                 <Card.Body>

@@ -29,13 +29,13 @@ const dashboardController = require("../controllers/dashboardController");
 router.get(
   "/admin/stats",
   isauthenticate,
-  isAuthorizedRoles("super_admin", "admin"),
+  isAuthorizedRoles("super_admin", "admin", "manager"),
   dashboardController.getSuperAdminStats
 );
 router.get(
   "/admin/analytics",
   isauthenticate,
-  isAuthorizedRoles("super_admin", "admin"),
+  isAuthorizedRoles("super_admin", "admin", "manager"),
   dashboardController.getAdvancedStats
 );
 
@@ -127,9 +127,32 @@ router.put(
 router.delete(
   "/product/:id",
   isauthenticate,
-  isAuthorizedRoles("admin", "super_admin"),
+  isAuthorizedRoles("admin", "super_admin", "manager"),
   productController.deleteProduct
 );
+
+
+router.put(
+  "/product/:id/toggle-status",
+  isauthenticate,
+  isAuthorizedRoles("admin", "super_admin", "manager"),
+  productController.toggleProductStatus
+);
+
+router.put(
+  "/product/:id/stock/adjust",
+  isauthenticate,
+  isAuthorizedRoles("admin", "super_admin", "manager", "provider"),
+  productController.adjustStock
+);
+
+router.get(
+  "/product/:id/stock/history",
+  isauthenticate,
+  isAuthorizedRoles("admin", "super_admin", "manager", "provider"),
+  productController.stockHistory
+);
+
 
 // Product Reviews
 router.put(
@@ -224,6 +247,30 @@ router.put(
   isauthenticate,
   isAuthorizedRoles("provider"),
   requirementController.rejectRequirement
+);
+router.put(
+  "/requirement/:id",
+  isauthenticate,
+  isAuthorizedRoles("manager", "admin", "super_admin"),
+  requirementController.updateRequirement
+);
+router.put(
+  "/requirement/:id/approve",
+  isauthenticate,
+  isAuthorizedRoles("admin", "super_admin"),
+  requirementController.approveRequirement
+);
+router.put(
+  "/requirement/:id/send",
+  isauthenticate,
+  isAuthorizedRoles("manager", "admin", "super_admin"),
+  requirementController.sendToProvider
+);
+router.put(
+  "/requirement/:id/provider-update",
+  isauthenticate,
+  isAuthorizedRoles("provider"),
+  requirementController.providerUpdateRequirement
 );
 router.post(
   "/requirement/:id/note",

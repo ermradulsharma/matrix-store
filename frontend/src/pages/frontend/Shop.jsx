@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Container, Row, Col, Form, Alert, Button, ButtonGroup } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, ButtonGroup } from 'react-bootstrap';
 import { Grid3x3Gap, ListUl, Funnel } from 'react-bootstrap-icons';
 import { fetchProducts } from '../../services/api';
 import ProductCard from '../../components/frontend/ProductCard/ProductCard';
@@ -7,12 +7,12 @@ import Loader from '../../components/frontend/Loader/Loader';
 import Pagination from '../../components/frontend/Pagination/Pagination';
 import SearchBar from '../../components/frontend/SearchBar/SearchBar';
 import CategoryFilter from '../../components/frontend/CategoryFilter/CategoryFilter';
+import { toast } from 'react-toastify';
 import '../../styles/pages/Shop.css';
 
 const Shop = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [searchQuery, setSearchQuery] = useState('');
@@ -26,7 +26,6 @@ const Shop = () => {
     useEffect(() => {
         const loadProducts = async () => {
             setLoading(true);
-            setError(null);
             try {
                 const skip = (currentPage - 1) * productsPerPage;
                 const data = await fetchProducts({
@@ -41,7 +40,7 @@ const Shop = () => {
                 setTotalPages(Math.ceil((data.total || productsList.length) / productsPerPage));
             } catch (error) {
                 console.error('Error loading products:', error);
-                setError('Failed to load products. Please try again later.');
+                toast.error('Failed to load products. Please try again later.');
                 setProducts([]);
             } finally {
                 setLoading(false);
@@ -188,12 +187,7 @@ const Shop = () => {
                             </div>
                         </div>
 
-                        {/* Error Message */}
-                        {error && (
-                            <Alert variant="danger" className="mb-4">
-                                {error}
-                            </Alert>
-                        )}
+
 
                         {/* Products */}
                         {loading ? (

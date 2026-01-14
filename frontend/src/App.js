@@ -58,6 +58,7 @@ import CustomerList from "./pages/dashboard/SuperAdmin/CustomerList";
 import ProductList from "./pages/dashboard/SuperAdmin/ProductList";
 import ManagerList from "./pages/dashboard/Admin/ManagerList";
 import CreateManager from "./pages/dashboard/Admin/CreateManager";
+import RequirementApprovals from "./pages/dashboard/Admin/RequirementApprovals";
 import CreateProviderUser from "./pages/dashboard/Common/CreateProviderUser";
 import CategoryList from "./pages/dashboard/SuperAdmin/CategoryList";
 import CreateCategory from "./pages/dashboard/SuperAdmin/CreateCategory";
@@ -67,6 +68,11 @@ import Reports from "./pages/dashboard/SuperAdmin/Reports";
 import UserProfile from "./pages/dashboard/Common/UserProfile";
 import UpdateProfile from "./pages/dashboard/Common/UpdateProfile";
 import Settings from "./pages/dashboard/Common/Settings";
+import CreateProduct from "./pages/dashboard/Common/CreateProduct";
+import EditProduct from "./pages/dashboard/Common/EditProduct";
+
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
     return (
@@ -75,6 +81,7 @@ function App() {
                 <CartProvider>
                     <WishlistProvider>
                         <Router>
+                            <ToastContainer position="top-right" autoClose={3000} />
                             <Routes>
                                 {/* Frontend Routes with NavBar and Footer */}
                                 {/* Frontend Routes with NavBar and Footer */}
@@ -146,6 +153,9 @@ function App() {
                                         <Route path="/providers" element={<ProviderList />} />
                                         <Route path="/providers/view/:id" element={<UserProfile />} />
                                         <Route path="/products" element={<ProductList />} />
+                                        <Route path="/products/new" element={<CreateProduct />} />
+                                        <Route path="/products/edit/:id" element={<EditProduct />} />
+                                        <Route path="/products/view/:id" element={<ProductDetails />} />
                                         <Route path="/customers" element={<CustomerList />} />
                                         <Route path="/customers/view/:id" element={<UserProfile />} />
                                         {/* Added routes */}
@@ -181,6 +191,12 @@ function App() {
 
                                         {/* Products */}
                                         <Route path="products" element={<ProductList />} />
+                                        <Route path="products/new" element={<CreateProduct />} />
+                                        <Route path="products/edit/:id" element={<EditProduct />} />
+                                        <Route path="products/view/:id" element={<ProductDetails />} />
+
+                                        {/* Requirement Approvals */}
+                                        <Route path="requirements/approvals" element={<RequirementApprovals />} />
 
                                         {/* Personal Profile */}
                                         <Route path="profile" element={<UserProfile />} />
@@ -204,6 +220,9 @@ function App() {
                                         <Route path="providers/profile/edit/:id" element={<EditProvider redirectPath="/manager/providers" />} />
 
                                         <Route path="products" element={<ProductList />} />
+                                        <Route path="products/new" element={<CreateProduct />} />
+                                        <Route path="products/edit/:id" element={<EditProduct />} />
+                                        <Route path="products/view/:id" element={<ProductDetails />} />
                                         <Route path="customers" element={<CustomerList />} />
                                         <Route path="requirements" element={<Requirements />} />
                                         <Route path="invoices" element={<InvoiceApprovals />} />
@@ -218,6 +237,9 @@ function App() {
                                     <Route element={<DashboardLayout />}>
                                         <Route index element={<DashboardHome />} />
                                         <Route path="products" element={<ProductList />} />
+                                        <Route path="products/new" element={<CreateProduct />} />
+                                        <Route path="products/edit/:id" element={<EditProduct />} />
+                                        <Route path="products/view/:id" element={<ProductDetails />} />
                                         <Route path="requirements" element={<AssignedRequirements />} />
                                         <Route path="invoices" element={<InvoiceHistory />} />
                                         <Route path="invoices/new" element={<CreateInvoice />} />

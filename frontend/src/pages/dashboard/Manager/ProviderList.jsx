@@ -3,6 +3,7 @@ import { Table, Button, Badge, Spinner, Container, Card } from 'react-bootstrap'
 import { fetchProviders, toggleProviderStatus, deleteProvider } from '../../../services/api';
 import { Link } from 'react-router-dom';
 import { FaPlus, FaEye, FaUserPlus, FaEdit, FaToggleOn, FaToggleOff, FaTrash, FaUserEdit } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 const ProviderList = () => {
     const [providers, setProviders] = useState([]);
@@ -15,6 +16,7 @@ const ProviderList = () => {
             setProviders(res.data.providers || []);
         } catch (error) {
             console.error('Error loading providers:', error);
+            toast.error("Failed to load providers");
         } finally {
             setLoading(false);
         }
@@ -30,11 +32,12 @@ const ProviderList = () => {
             try {
                 const res = await toggleProviderStatus(id);
                 if (res.data.success) {
+                    toast.success(`Provider ${action}d successfully`);
                     loadProviders();
                 }
             } catch (error) {
                 console.error('Error updating provider status:', error);
-                alert('Failed to update status');
+                toast.error('Failed to update status');
             }
         }
     };
@@ -44,10 +47,10 @@ const ProviderList = () => {
             try {
                 await deleteProvider(id);
                 loadProviders();
-                alert('Provider deleted successfully');
+                toast.success('Provider deleted successfully');
             } catch (error) {
                 console.error('Error deleting provider:', error);
-                alert('Failed to delete provider');
+                toast.error('Failed to delete provider');
             }
         }
     };

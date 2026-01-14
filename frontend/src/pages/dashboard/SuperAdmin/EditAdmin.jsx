@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, Form, Button, Alert, Spinner, Container, Row, Col } from 'react-bootstrap';
+import { Card, Form, Button, Spinner, Container, Row, Col } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchUserDetails, updateUserAdmin } from '../../../services/api';
 import { FaUserEdit, FaArrowLeft, FaTimes } from 'react-icons/fa';
+
+import { toast } from 'react-toastify';
 
 const EditAdmin = () => {
     const { id } = useParams();
@@ -17,8 +19,6 @@ const EditAdmin = () => {
     });
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
-    const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(null);
 
     const loadAdminDetails = useCallback(async () => {
         try {
@@ -31,7 +31,7 @@ const EditAdmin = () => {
                 password: '' // Don't pre-fill password
             });
         } catch (err) {
-            setError("Failed to load admin details");
+            toast.error("Failed to load admin details");
         } finally {
             setLoading(false);
         }
@@ -48,17 +48,15 @@ const EditAdmin = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setUpdating(true);
-        setError(null);
-        setSuccess(null);
 
         try {
             const res = await updateUserAdmin(id, formData);
             if (res.data.success) {
-                setSuccess("Admin details updated successfully!");
+                toast.success("Admin details updated successfully!");
                 setTimeout(() => navigate(-1), 1500);
             }
         } catch (err) {
-            setError(err.response?.data?.message || "Failed to update admin");
+            toast.error(err.response?.data?.message || "Failed to update admin");
         } finally {
             setUpdating(false);
         }
@@ -76,8 +74,7 @@ const EditAdmin = () => {
                     </Button>
                 </Card.Header>
                 <Card.Body className="p-4">
-                    {error && <Alert variant="danger">{error}</Alert>}
-                    {success && <Alert variant="success">{success}</Alert>}
+
 
                     <Form onSubmit={handleSubmit}>
                         <Row>

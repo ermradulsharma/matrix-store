@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Card, Spinner, Alert, Container, Row, Col } from 'react-bootstrap';
+import { Form, Button, Card, Spinner, Container, Row, Col } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchCategoryDetails, updateCategory } from '../../../services/api';
 import { FaSave, FaArrowLeft, FaCloudUploadAlt } from 'react-icons/fa';
+
+import { toast } from 'react-toastify';
 
 const EditCategory = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
-    const [error, setError] = useState('');
     const [imagePreview, setImagePreview] = useState(null);
 
     const [formData, setFormData] = useState({
@@ -36,7 +37,7 @@ const EditCategory = () => {
                 setImagePreview(data.image.url);
             }
         } catch (err) {
-            setError('Failed to load category details');
+            toast.error('Failed to load category details');
         } finally {
             setLoading(false);
         }
@@ -61,7 +62,6 @@ const EditCategory = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitting(true);
-        setError('');
 
         // Prepare data - valid even if image is not updated (backend should handle it)
         const updateData = {
@@ -75,10 +75,11 @@ const EditCategory = () => {
         try {
             const res = await updateCategory(id, updateData);
             if (res.success) {
-                navigate(-1); // Go back to list
+                toast.success("Category updated successfully");
+                setTimeout(() => navigate(-1), 1500);
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to update category');
+            toast.error(err.response?.data?.message || 'Failed to update category');
         } finally {
             setSubmitting(false);
         }
@@ -103,7 +104,7 @@ const EditCategory = () => {
                             <h4 className="fw-bold text-dark mb-0">Edit Category</h4>
                         </Card.Header>
                         <Card.Body className="p-4">
-                            {error && <Alert variant="danger">{error}</Alert>}
+
 
                             <Form onSubmit={handleSubmit}>
                                 <Form.Group className="mb-3">

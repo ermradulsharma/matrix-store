@@ -1,8 +1,9 @@
 import React, { useContext, useState } from 'react';
-import { Container, Form, Button, Card, Alert, Row, Col, ProgressBar } from 'react-bootstrap';
+import { Container, Form, Button, Card, Row, Col, ProgressBar } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import { sendOtp, verifyOtp } from '../../services/api';
+import { toast } from 'react-toastify';
 
 const Register = () => {
     const { register, loading: authLoading } = useContext(AuthContext);
@@ -10,7 +11,6 @@ const Register = () => {
 
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
     const [otpSent, setOtpSent] = useState(false);
     const [otp, setOtp] = useState('');
 
@@ -39,17 +39,16 @@ const Register = () => {
     // ================= STEP 1: MOBILE & OTP =================
     const handleSendOtp = async () => {
         if (!formData.mobile_no || formData.mobile_no.length !== 10) {
-            setError('Please enter a valid 10-digit mobile number');
+            toast.error('Please enter a valid 10-digit mobile number');
             return;
         }
         setLoading(true);
-        setError('');
         try {
             await sendOtp(formData.mobile_no);
             setOtpSent(true);
-            alert('OTP sent: 1234'); // Visualization for the user
+            toast.info('OTP sent: 1234'); // Visualization for the user
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to send OTP');
+            toast.error(err.response?.data?.message || 'Failed to send OTP');
         } finally {
             setLoading(false);
         }
@@ -57,17 +56,17 @@ const Register = () => {
 
     const handleVerifyOtp = async () => {
         if (!otp) {
-            setError('Please enter the OTP');
+            toast.error('Please enter the OTP');
             return;
         }
         setLoading(true);
-        setError('');
         try {
             await verifyOtp(formData.mobile_no, otp);
             setStep(2);
             setOtpSent(false); // Reset for clean state if needed later
+            toast.success("Mobile Verified!");
         } catch (err) {
-            setError(err.response?.data?.message || 'Invalid OTP');
+            toast.error(err.response?.data?.message || 'Invalid OTP');
         } finally {
             setLoading(false);
         }
@@ -78,25 +77,24 @@ const Register = () => {
         e.preventDefault();
         // Basic validation
         if (!formData.first_name || !formData.email || !formData.password || !formData.confirm_password) {
-            setError('Please fill in all required fields');
+            toast.error('Please fill in all required fields');
             return;
         }
         if (formData.password !== formData.confirm_password) {
-            setError('Passwords do not match');
+            toast.error('Passwords do not match');
             return;
         }
         if (formData.password.length < 8) {
-            setError('Password must be at least 8 characters');
+            toast.error('Password must be at least 8 characters');
             return;
         }
-        setError('');
         setStep(3);
     };
 
     // ================= STEP 3: ADDRESS & SUBMIT =================
     const fetchCurrentLocation = () => {
         if (!navigator.geolocation) {
-            setError('Geolocation is not supported by your browser');
+            toast.error('Geolocation is not supported by your browser');
             return;
         }
         setLoading(true);
@@ -124,17 +122,18 @@ const Register = () => {
                             country: addr.country || '',
                             pincode: addr.postcode || ''
                         }));
+                        toast.success("Location Fetched!");
                     }
                 } catch (err) {
                     console.error('Error fetching address:', err);
-                    setError('Failed to fetch address details');
+                    toast.error('Failed to fetch address details');
                 } finally {
                     setLoading(false);
                 }
             },
             (err) => {
                 console.error('Geolocation error:', err);
-                setError('Unable to retrieve your location');
+                toast.error('Unable to retrieve your location');
                 setLoading(false);
             }
         );
@@ -142,19 +141,17 @@ const Register = () => {
 
     const handleFinalSubmit = async (e) => {
         e.preventDefault();
-        setError('');
 
         // Final validation if needed
         if (!formData.district || !formData.state || !formData.pincode) {
-            setError('Please complete the address details');
+            toast.error('Please complete the address details');
             return;
         }
 
         const result = await register(formData);
         if (result.success) {
+            toast.success("Registration Successful!");
             navigate('/profile');
-        } else {
-            setError(result.error || 'Registration failed');
         }
     };
 
@@ -309,8 +306,6 @@ const Register = () => {
                             <ProgressBar key={3} now={33.4} label="Address" variant={step >= 3 ? "success" : "secondary"} animated={step === 3} />
                         </ProgressBar>
                     </div>
-
-                    {error && <Alert variant="danger">{error}</Alert>}
 
                     {step === 1 && renderStep1()}
                     {step === 2 && renderStep2()}

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Card, Form, Button, Alert, Spinner, Container, Row, Col } from 'react-bootstrap';
+import { Card, Form, Button, Spinner, Container, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { createUser } from '../../../services/api';
 import { FaUserPlus, FaArrowLeft, FaTimes } from 'react-icons/fa';
+
+import { toast } from 'react-toastify';
 
 const CreateAdmin = () => {
     const [formData, setFormData] = useState({
@@ -14,8 +16,6 @@ const CreateAdmin = () => {
         role: 'admin'
     });
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(null);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -25,17 +25,15 @@ const CreateAdmin = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError(null);
-        setSuccess(null);
 
         try {
             const res = await createUser(formData);
             if (res.data.success) {
-                setSuccess("Admin created successfully!");
+                toast.success("Admin created successfully!");
                 setTimeout(() => navigate(-1), 1500);
             }
         } catch (err) {
-            setError(err.response?.data?.message || "Failed to create admin");
+            toast.error(err.response?.data?.message || "Failed to create admin");
         } finally {
             setLoading(false);
         }
@@ -49,8 +47,7 @@ const CreateAdmin = () => {
                     <Button variant="danger" className='d-flex align-items-center gap-1 justify-content-center' onClick={() => navigate(-1)}><FaArrowLeft /> Back </Button>
                 </Card.Header>
                 <Card.Body className="p-4">
-                    {error && <Alert variant="danger">{error}</Alert>}
-                    {success && <Alert variant="success">{success}</Alert>}
+
 
                     <Form onSubmit={handleSubmit}>
                         <Row>

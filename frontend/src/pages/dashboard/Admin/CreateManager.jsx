@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Form, Button, Card, Alert, Spinner, Container, Row, Col } from 'react-bootstrap';
+import { Form, Button, Card, Spinner, Container, Row, Col } from 'react-bootstrap';
 import { createUser } from '../../../services/api';
 import { useNavigate } from 'react-router-dom';
 import { FaUserTie, FaArrowLeft, FaTimes } from 'react-icons/fa';
+
+import { toast } from 'react-toastify';
 
 const CreateManager = () => {
     const navigate = useNavigate();
@@ -15,8 +17,6 @@ const CreateManager = () => {
         role: 'manager'
     });
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(null);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,17 +25,15 @@ const CreateManager = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError(null);
-        setSuccess(null);
 
         try {
             const res = await createUser(formData);
             if (res.data.success) {
-                setSuccess("Manager created successfully!");
+                toast.success("Manager created successfully!");
                 setTimeout(() => navigate(-1), 1500);
             }
         } catch (err) {
-            setError(err.response?.data?.message || "Failed to create manager");
+            toast.error(err.response?.data?.message || "Failed to create manager");
         } finally {
             setLoading(false);
         }
@@ -49,8 +47,7 @@ const CreateManager = () => {
                     <Button variant="danger" className='d-flex align-items-center gap-1 justify-content-center' onClick={() => navigate(-1)}><FaArrowLeft /> Back </Button>
                 </Card.Header>
                 <Card.Body className="p-4">
-                    {error && <Alert variant="danger">{error}</Alert>}
-                    {success && <Alert variant="success">{success}</Alert>}
+
                     <Form onSubmit={handleSubmit}>
                         <Row>
                             <Col md={6} className="mb-3">

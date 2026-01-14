@@ -1,12 +1,13 @@
 import React from 'react';
 import { Container, Row, Col, Card, Form, Button } from 'react-bootstrap';
 import { Envelope, Phone, GeoAlt, Clock } from 'react-bootstrap-icons';
+import { toast } from 'react-toastify';
 import '../../styles/pages/Contact.css';
 
 function Contact() {
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert('Thank you for your message! We will get back to you soon.');
+    toast.success('Thank you for your message! We will get back to you soon.');
   };
 
   return (

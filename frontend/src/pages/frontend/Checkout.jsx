@@ -1,9 +1,10 @@
 import React, { useContext, useState } from 'react';
-import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Card, Form, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../../context/CartContext';
 import { AuthContext } from '../../context/AuthContext';
 import { submitOrder } from '../../services/api';
+import { toast } from 'react-toastify';
 import '../../styles/pages/Checkout.css';
 
 const Checkout = () => {
@@ -23,7 +24,6 @@ const Checkout = () => {
     });
 
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -31,11 +31,10 @@ const Checkout = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
 
         // Basic validation
         if (!formData.fullName || !formData.email || !formData.address || !formData.city) {
-            setError('Please fill in all required fields');
+            toast.error('Please fill in all required fields');
             return;
         }
 
@@ -54,9 +53,10 @@ const Checkout = () => {
 
             const response = await submitOrder(orderData);
             clearCart();
+            toast.success("Order Placed Successfully!");
             navigate('/order-success', { state: { orderId: response.id, orderData } });
         } catch (err) {
-            setError('Failed to place order. Please try again.');
+            toast.error('Failed to place order. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -76,7 +76,6 @@ const Checkout = () => {
     return (
         <Container className="my-4">
             <h1 className="mb-4">Checkout</h1>
-            {error && <Alert variant="danger">{error}</Alert>}
             <Row>
                 <Col lg={8}>
                     <Card className="mb-3">

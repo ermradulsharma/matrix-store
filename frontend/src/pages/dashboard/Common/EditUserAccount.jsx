@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
+import { Card, Form, Button, Spinner } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchUserDetails, updateUserAdmin } from '../../../services/api';
 import { FaUserEdit, FaArrowLeft } from 'react-icons/fa';
+
+import { toast } from 'react-toastify';
 
 const EditUserAccount = ({ redirectPath, title }) => {
     const { id } = useParams();
@@ -17,8 +19,6 @@ const EditUserAccount = ({ redirectPath, title }) => {
     });
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
-    const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(null);
 
     useEffect(() => {
         loadUserDetails();
@@ -36,7 +36,7 @@ const EditUserAccount = ({ redirectPath, title }) => {
                 password: '' // Don't pre-fill password
             });
         } catch (err) {
-            setError("Failed to load user details");
+            toast.error("Failed to load user details");
         } finally {
             setLoading(false);
         }
@@ -49,17 +49,15 @@ const EditUserAccount = ({ redirectPath, title }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setUpdating(true);
-        setError(null);
-        setSuccess(null);
 
         try {
             const res = await updateUserAdmin(id, formData);
             if (res.data.success) {
-                setSuccess(`${title} details updated successfully!`);
+                toast.success(`${title} details updated successfully!`);
                 setTimeout(() => navigate(redirectPath), 1500);
             }
         } catch (err) {
-            setError(err.response?.data?.message || "Failed to update user");
+            toast.error(err.response?.data?.message || "Failed to update user");
         } finally {
             setUpdating(false);
         }
@@ -80,8 +78,7 @@ const EditUserAccount = ({ redirectPath, title }) => {
                 <div className="col-md-8">
                     <Card className="shadow-sm">
                         <Card.Body className="p-4">
-                            {error && <Alert variant="danger">{error}</Alert>}
-                            {success && <Alert variant="success">{success}</Alert>}
+
 
                             <Form onSubmit={handleSubmit}>
                                 <div className="row">
