@@ -399,4 +399,13 @@ router.post(
 
 // Role Management (Super Admin Only)
 
+const cartController = require("../controllers/cartController");
+
+// Cart Routes
+router.get("/cart", isauthenticate, cartController.getCart);
+router.post("/cart/sync", isauthenticate, cartController.syncCart);
+router.post("/cart/add", isauthenticate, cartController.addToCart);
+router.delete("/cart/remove/:productId", isauthenticate, cartController.removeFromCart);
+router.put("/cart/update", isauthenticate, cartController.updateCartItem);
+
 module.exports = router;

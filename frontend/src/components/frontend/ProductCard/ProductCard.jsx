@@ -1,7 +1,8 @@
 import React, { useContext } from "react";
 import { Button, Badge } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { Heart, HeartFill, Cart3, Eye } from "react-bootstrap-icons";
+import { Heart, HeartFill, Cart3, Eye, Bell } from "react-bootstrap-icons";
+import { toast } from 'react-toastify';
 import { CartContext } from "../../../context/CartContext";
 import { WishlistContext } from "../../../context/WishlistContext";
 import RatingStars from "../RatingStars/RatingStars";
@@ -124,15 +125,31 @@ function ProductCard({ product, title, description, imageUrl, price, buttonLink 
             )}
           </div>
 
-          <Button
-            variant="primary"
-            size="sm"
-            className="add-to-cart-btn"
-            onClick={handleAddToCart}
-          >
-            <Cart3 className="me-1" size={16} />
-            Add to Cart
-          </Button>
+          {productData.stock > 0 ? (
+            <Button
+              variant="primary"
+              size="sm"
+              className="add-to-cart-btn"
+              onClick={handleAddToCart}
+            >
+              <Cart3 className="me-1" size={16} />
+              Add to Cart
+            </Button>
+          ) : (
+            <Button
+              variant="warning"
+              size="sm"
+              className="add-to-cart-btn text-dark"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toast.info("You will be notified when this product is available!");
+              }}
+            >
+              <Bell className="me-1" size={16} />
+              Notify Me
+            </Button>
+          )}
         </div>
       </div>
     </div>

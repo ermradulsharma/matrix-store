@@ -510,3 +510,55 @@ export const updateRolePermissions = async (id, permissions) => {
 export const updateUserPermissions = async (userId, permissions) => {
   return await api.put(`/admin/user/${userId}/permissions`, { permissions });
 };
+
+// ============= CART SERVICES =============
+export const fetchCart = async () => {
+  try {
+    const res = await api.get("/cart");
+    return res.data.cart;
+  } catch (error) {
+    console.error("Error fetching cart:", error);
+    throw error;
+  }
+};
+
+export const syncCart = async (items) => {
+  try {
+    const res = await api.post("/cart/sync", { items });
+    return res.data.cart;
+  } catch (error) {
+    console.error("Error syncing cart:", error);
+    throw error;
+  }
+};
+
+export const addItemToCart = async (productId, quantity) => {
+  try {
+    const res = await api.post("/cart/add", { productId, quantity });
+    return res.data.cart;
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    throw error;
+  }
+};
+
+export const removeItemFromCart = async (productId) => {
+  try {
+    const res = await api.delete(`/cart/remove/${productId}`);
+    return res.data.cart;
+  } catch (error) {
+    console.error("Error removing from cart:", error);
+    throw error;
+  }
+};
+
+export const updateCartItemQuantity = async (productId, quantity) => {
+  try {
+    const res = await api.put("/cart/update", { productId, quantity });
+    return res.data.cart;
+  } catch (error) {
+    console.error("Error updating cart item:", error);
+    throw error;
+  }
+};
+

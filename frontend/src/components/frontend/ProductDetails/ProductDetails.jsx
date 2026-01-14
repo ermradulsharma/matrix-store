@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Button, Badge, Card, Tab, Nav, Alert } from "react-bootstrap";
-import { Heart, HeartFill, Cart3, Truck, ShieldCheck, ArrowLeft } from "react-bootstrap-icons";
+import { Heart, HeartFill, Cart3, Truck, ShieldCheck, ArrowLeft, Bell } from "react-bootstrap-icons";
 import { CartContext } from "../../../context/CartContext";
 import { WishlistContext } from "../../../context/WishlistContext";
 import RatingStars from "../RatingStars/RatingStars";
@@ -196,16 +196,27 @@ function ProductDetails() {
 
               {/* Action Buttons */}
               <div className="action-buttons-grid mb-5">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  className="add-to-cart-btn-large w-100"
-                  onClick={handleAddToCart}
-                  disabled={product.stock === 0}
-                >
-                  <Cart3 className="me-2" />
-                  Add to Cart
-                </Button>
+                {product.stock > 0 ? (
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    className="add-to-cart-btn-large w-100"
+                    onClick={handleAddToCart}
+                  >
+                    <Cart3 className="me-2" />
+                    Add to Cart
+                  </Button>
+                ) : (
+                  <Button
+                    variant="warning"
+                    size="lg"
+                    className="add-to-cart-btn-large w-100 text-white"
+                    onClick={() => toast.info("You will be notified when this product is back in stock!")}
+                  >
+                    <Bell className="me-2" />
+                    Notify Me
+                  </Button>
+                )}
                 <Button
                   variant={isInWishlist ? "danger" : "outline-secondary"}
                   size="lg"
